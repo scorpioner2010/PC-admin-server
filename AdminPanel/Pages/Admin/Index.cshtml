@@ -49,19 +49,11 @@ ViewData["Title"] = "Admin";
                     </div>
                 </div>
 
-                <div class="mt-2 small text-muted">
-                    <div>Uptime: @rec.Status.UptimeSec s</div>
-                    <div>Last status: @rec.Status.Time.ToLocalTime()</div>
-                    <div>Last seen: @rec.LastSeen.ToLocalTime()</div>
-                    <div>Allowed until: <span class="text-body">@((pol?.AllowedUntil.ToLocalTime().ToString()) ?? "-")</span></div>
-                    <div>
-                        Time left:
-                        <span class="fw-semibold js-remaining"
-                              data-allowed-until="@allowedIso">—</span>
-                    </div>
-                    <div class="mt-1 text-muted">
-                        Manual unlock grace: @(pol?.ManualUnlockGraceMinutes ?? 10) min
-                    </div>
+                <!-- TIME LEFT only (prominent) -->
+                <div class="mt-3">
+                    <div class="text-muted mb-1">Time left</div>
+                    <span class="badge rounded-pill px-3 py-2 fs-4 js-remaining-badge"
+                          data-allowed-until="@allowedIso">--</span>
                 </div>
 
                 <div class="mt-3">
@@ -78,7 +70,7 @@ ViewData["Title"] = "Admin";
                             <button type="submit" formaction="?handler=SetTime" class="btn btn-warning w-50">Set time</button>
                         </div>
 
-                        <!-- Optional extra actions (keep/remove as needed) -->
+                        <!-- Optional extra actions -->
                         <div class="d-flex gap-2 mt-2">
                             <button type="submit" formaction="?handler=Block" class="btn btn-outline-danger w-50">Lock</button>
                             <button type="submit" formaction="?handler=Unblock" class="btn btn-outline-secondary w-50">Unlock</button>
@@ -100,25 +92,40 @@ ViewData["Title"] = "Admin";
 @section Scripts {
 <script>
     (function(){
-        // --- countdown per agent ---
         function pad(n){ return n < 10 ? '0'+n : ''+n; }
+
         function updateRemaining(){
-            const nodes = document.querySelectorAll('.js-remaining');
+            const nodes = document.querySelectorAll('.js-remaining-badge');
             const now = new Date();
+
             nodes.forEach(n=>{
                 const iso = n.getAttribute('data-allowed-until');
-                if(!iso){ n.textContent = '-'; return; }
+                // reset classes
+                n.classList.remove('bg-success','bg-warning','bg-danger','bg-secondary');
+
+                if(!iso){ n.textContent = '-'; n.classList.add('bg-secondary'); return; }
                 const until = new Date(iso);
-                if(isNaN(until.getTime())){ n.textContent = '-'; return; }
+                if(isNaN(until.getTime())){ n.textContent = '-'; n.classList.add('bg-secondary'); return; }
+
                 let diff = Math.floor((until - now) / 1000);
-                if(diff <= 0){ n.textContent = '0s'; return; }
+                if(diff <= 0){ n.textContent = '0s'; n.classList.add('bg-danger'); return; }
+
                 const h = Math.floor(diff / 3600);
                 diff -= h*3600;
                 const m = Math.floor(diff / 60);
                 const s = diff - m*60;
+
+                // Text: HH:MM:SS if >=1h, else MM:SS
                 n.textContent = (h>0 ? (h+'h ') : '') + m + 'm ' + pad(s) + 's';
+
+                // Color thresholds: >15m green, 15–5m warning, <5m danger
+                const totalMin = (until - now) / 60000;
+                if (totalMin > 15) n.classList.add('bg-success');
+                else if (totalMin > 5) n.classList.add('bg-warning');
+                else n.classList.add('bg-danger');
             });
         }
+
         updateRemaining();
         setInterval(updateRemaining, 1000);
 
@@ -137,7 +144,7 @@ ViewData["Title"] = "Admin";
             refreshTimer = null;
         }
 
-        // init from localStorage (default: enabled)
+        // default: enabled
         const saved = localStorage.getItem(KEY);
         const enabled = (saved === null) ? true : saved === '1';
         toggle.checked = enabled;
