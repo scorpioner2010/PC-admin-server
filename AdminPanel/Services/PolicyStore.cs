@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace AdminPanel.Services
 {
     public sealed class AgentPolicy
@@ -18,13 +15,13 @@ namespace AdminPanel.Services
 
     public sealed class PolicyStore : IPolicyStore
     {
-        private readonly Dictionary<string, AgentPolicy> _policies = new Dictionary<string, AgentPolicy>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, AgentPolicy> _policies =
+            new(StringComparer.OrdinalIgnoreCase);
 
         public AgentPolicy GetPolicy(string machine)
         {
             if (!_policies.TryGetValue(machine, out var p))
             {
-                // За замовчуванням дозволяємо 60 хвилин
                 p = new AgentPolicy
                 {
                     AllowedUntil = DateTimeOffset.Now.AddHours(1),

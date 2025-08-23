@@ -6,11 +6,11 @@
 
 <div class="container-fluid px-2">
     <h1 class="h3 my-3">Admin</h1>
-    <p class="text-muted mb-3">Мінімалістична панель керування для мобільного.</p>
+    <p class="text-muted mb-3">Minimal mobile control panel.</p>
 
     @if (Model.Agents.Count == 0)
     {
-        <div class="alert alert-secondary">Немає активних агентів.</div>
+        <div class="alert alert-secondary">No active agents.</div>
     }
     else
     {
@@ -53,22 +53,22 @@
                                     <form method="post" asp-page-handler="Block">
                                         <input type="hidden" name="machine" value="@machine" />
                                         @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-danger w-100">Блокувати</button>
+                                        <button type="submit" class="btn btn-danger w-100">Block</button>
                                     </form>
                                 </div>
                                 <div class="col-12 col-sm-4">
                                     <form method="post" asp-page-handler="Unblock">
                                         <input type="hidden" name="machine" value="@machine" />
                                         @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-secondary w-100">Розблокувати</button>
+                                        <button type="submit" class="btn btn-secondary w-100">Unblock</button>
                                     </form>
                                 </div>
                                 <div class="col-12 col-sm-4">
                                     <form method="post" asp-page-handler="Timer" class="d-flex gap-2">
                                         <input type="hidden" name="machine" value="@machine" />
-                                        <input type="number" name="minutes" value="30" min="1" class="form-control" placeholder="Хвилини" />
+                                        <input type="number" name="minutes" value="30" min="1" class="form-control" placeholder="Minutes" />
                                         @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-warning">Таймер</button>
+                                        <button type="submit" class="btn btn-warning">Timer</button>
                                     </form>
                                 </div>
                             </div>

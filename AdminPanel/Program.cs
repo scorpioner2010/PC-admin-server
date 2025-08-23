@@ -5,9 +5,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 
-// In-memory сховища
+// In-memory stores
 builder.Services.AddSingleton<IAgentStore, AgentStore>();
-builder.Services.AddSingleton<IPolicyStore, PolicyStore>(); // ⬅️ нове
+builder.Services.AddSingleton<IPolicyStore, PolicyStore>();
 
 var app = builder.Build();
 

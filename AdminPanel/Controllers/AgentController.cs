@@ -28,9 +28,7 @@ namespace AdminPanel.Controllers
         public IActionResult ReceiveStatus([FromBody] IncomingStatus data)
         {
             if (data == null || string.IsNullOrWhiteSpace(data.Machine))
-            {
                 return BadRequest(new { message = "No data or missing machine" });
-            }
 
             var parsedTime = DateTimeOffset.TryParse(data.Time, out var dto) ? dto : DateTimeOffset.Now;
 

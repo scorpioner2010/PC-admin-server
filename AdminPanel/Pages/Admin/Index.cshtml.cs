@@ -15,28 +15,26 @@ namespace AdminPanel.Pages.Admin
             _policies = policies;
         }
 
-        public IReadOnlyDictionary<string, AgentRecord> Agents { get; private set; } = new Dictionary<string, AgentRecord>();
-        public Dictionary<string, AgentPolicy> Policies { get; private set; } = new Dictionary<string, AgentPolicy>(StringComparer.OrdinalIgnoreCase);
+        public IReadOnlyDictionary<string, AgentRecord> Agents { get; private set; } =
+            new Dictionary<string, AgentRecord>();
 
-        [BindProperty]
-        public string Machine { get; set; } = "";
-
-        [BindProperty]
-        public int Minutes { get; set; } = 30;
+        public Dictionary<string, AgentPolicy> Policies { get; private set; } =
+            new(StringComparer.OrdinalIgnoreCase);
 
         public void OnGet()
         {
             Agents = _store.Snapshot();
-            Policies = Agents.Keys.ToDictionary(k => k, k => _policies.GetPolicy(k), StringComparer.OrdinalIgnoreCase);
+            Policies = Agents.Keys.ToDictionary(k => k, k => _policies.GetPolicy(k),
+                StringComparer.OrdinalIgnoreCase);
         }
 
         public IActionResult OnPostBlock(string machine)
         {
-            if (string.IsNullOrWhiteSpace(machine)) { return RedirectToPage(); }
+            if (string.IsNullOrWhiteSpace(machine)) return RedirectToPage();
 
             var p = _policies.GetPolicy(machine);
             p.RequireLock = true;
-            p.AllowedUntil = DateTimeOffset.Now; // блокуємо негайно
+            p.AllowedUntil = DateTimeOffset.Now;
             p.Message = "Forced lock by admin";
             _policies.SetPolicy(machine, p);
 
@@ -45,15 +43,12 @@ namespace AdminPanel.Pages.Admin
 
         public IActionResult OnPostUnblock(string machine)
         {
-            if (string.IsNullOrWhiteSpace(machine)) { return RedirectToPage(); }
+            if (string.IsNullOrWhiteSpace(machine)) return RedirectToPage();
 
             var p = _policies.GetPolicy(machine);
             p.RequireLock = false;
-            // даємо буфер 60 хв як дефолт
             if (p.AllowedUntil < DateTimeOffset.Now.AddMinutes(1))
-            {
                 p.AllowedUntil = DateTimeOffset.Now.AddHours(1);
-            }
             p.Message = "Unlocked by admin";
             _policies.SetPolicy(machine, p);
 
@@ -62,8 +57,8 @@ namespace AdminPanel.Pages.Admin
 
         public IActionResult OnPostTimer(string machine, int minutes)
         {
-            if (string.IsNullOrWhiteSpace(machine)) { return RedirectToPage(); }
-            if (minutes < 1) { minutes = 1; }
+            if (string.IsNullOrWhiteSpace(machine)) return RedirectToPage();
+            if (minutes < 1) minutes = 1;
 
             var p = _policies.GetPolicy(machine);
             p.RequireLock = false;

@@ -9,43 +9,43 @@ build_property.EnforceExtendedAnalyzerRules =
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = AdminPanel
 build_property.RootNamespace = AdminPanel
-build_property.ProjectDir = A:\Programing\ServerProjects\PC-admin-server\AdminPanel\AdminPanel\
+build_property.ProjectDir = A:\Programing\ServerProjects\PC-admin-server\AdminPanel\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 8.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = A:\Programing\ServerProjects\PC-admin-server\AdminPanel\AdminPanel
+build_property.MSBuildProjectDirectory = A:\Programing\ServerProjects\PC-admin-server\AdminPanel
 build_property._RazorSourceGeneratorDebug = 
 
-[A:/Programing/ServerProjects/PC-admin-server/AdminPanel/AdminPanel/Pages/Admin/Index.cshtml]
+[A:/Programing/ServerProjects/PC-admin-server/AdminPanel/Pages/Admin/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[A:/Programing/ServerProjects/PC-admin-server/AdminPanel/AdminPanel/Pages/Error.cshtml]
+[A:/Programing/ServerProjects/PC-admin-server/AdminPanel/Pages/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRXJyb3IuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[A:/Programing/ServerProjects/PC-admin-server/AdminPanel/AdminPanel/Pages/Index.cshtml]
+[A:/Programing/ServerProjects/PC-admin-server/AdminPanel/Pages/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[A:/Programing/ServerProjects/PC-admin-server/AdminPanel/AdminPanel/Pages/Privacy.cshtml]
+[A:/Programing/ServerProjects/PC-admin-server/AdminPanel/Pages/Privacy.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUHJpdmFjeS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[A:/Programing/ServerProjects/PC-admin-server/AdminPanel/AdminPanel/Pages/Shared/_ValidationScriptsPartial.cshtml]
+[A:/Programing/ServerProjects/PC-admin-server/AdminPanel/Pages/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[A:/Programing/ServerProjects/PC-admin-server/AdminPanel/AdminPanel/Pages/_ViewImports.cshtml]
+[A:/Programing/ServerProjects/PC-admin-server/AdminPanel/Pages/_ViewImports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[A:/Programing/ServerProjects/PC-admin-server/AdminPanel/AdminPanel/Pages/_ViewStart.cshtml]
+[A:/Programing/ServerProjects/PC-admin-server/AdminPanel/Pages/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[A:/Programing/ServerProjects/PC-admin-server/AdminPanel/AdminPanel/Pages/Shared/_Layout.cshtml]
+[A:/Programing/ServerProjects/PC-admin-server/AdminPanel/Pages/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcU2hhcmVkXF9MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = b-zs5wft6i3j

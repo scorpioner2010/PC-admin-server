@@ -24,7 +24,8 @@ namespace AdminPanel.Services
 
     public sealed class AgentStore : IAgentStore
     {
-        private readonly ConcurrentDictionary<string, AgentRecord> _agents = new ConcurrentDictionary<string, AgentRecord>();
+        private readonly ConcurrentDictionary<string, AgentRecord> _agents =
+            new(StringComparer.OrdinalIgnoreCase);
 
         public void Upsert(AgentStatus status)
         {
@@ -37,8 +38,6 @@ namespace AdminPanel.Services
         }
 
         public IReadOnlyDictionary<string, AgentRecord> Snapshot()
-        {
-            return new Dictionary<string, AgentRecord>(_agents);
-        }
+            => new Dictionary<string, AgentRecord>(_agents);
     }
 }

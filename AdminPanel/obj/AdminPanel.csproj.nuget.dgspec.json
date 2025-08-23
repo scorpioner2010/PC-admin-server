@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "A:\\Programing\\ServerProjects\\PC-admin-server\\AdminPanel\\AdminPanel\\AdminPanel.csproj": {}
+    "A:\\Programing\\ServerProjects\\PC-admin-server\\AdminPanel\\AdminPanel.csproj": {}
   },
   "projects": {
-    "A:\\Programing\\ServerProjects\\PC-admin-server\\AdminPanel\\AdminPanel\\AdminPanel.csproj": {
+    "A:\\Programing\\ServerProjects\\PC-admin-server\\AdminPanel\\AdminPanel.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "A:\\Programing\\ServerProjects\\PC-admin-server\\AdminPanel\\AdminPanel\\AdminPanel.csproj",
+        "projectUniqueName": "A:\\Programing\\ServerProjects\\PC-admin-server\\AdminPanel\\AdminPanel.csproj",
         "projectName": "AdminPanel",
-        "projectPath": "A:\\Programing\\ServerProjects\\PC-admin-server\\AdminPanel\\AdminPanel\\AdminPanel.csproj",
+        "projectPath": "A:\\Programing\\ServerProjects\\PC-admin-server\\AdminPanel\\AdminPanel.csproj",
         "packagesPath": "C:\\Users\\Toras\\.nuget\\packages\\",
-        "outputPath": "A:\\Programing\\ServerProjects\\PC-admin-server\\AdminPanel\\AdminPanel\\obj\\",
+        "outputPath": "A:\\Programing\\ServerProjects\\PC-admin-server\\AdminPanel\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
