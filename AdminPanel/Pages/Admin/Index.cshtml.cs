@@ -23,9 +23,7 @@ namespace AdminPanel.Pages.Admin
 
         public void OnGet()
         {
-            // Ensure we don't show agents that haven't reported in >10s
-            _store.Cleanup(TimeSpan.FromSeconds(10));
-
+            _store.Cleanup(TimeSpan.FromSeconds(10)); // ensure list shows only fresh agents
             Agents = _store.Snapshot();
             Policies = Agents.Keys.ToDictionary(k => k, k => _policies.GetPolicy(k),
                 StringComparer.OrdinalIgnoreCase);
@@ -67,6 +65,20 @@ namespace AdminPanel.Pages.Admin
             p.RequireLock = false;
             p.AllowedUntil = DateTimeOffset.Now.AddMinutes(minutes);
             p.Message = $"Timer set to {minutes} minute(s)";
+            _policies.SetPolicy(machine, p);
+
+            return RedirectToPage();
+        }
+
+        public IActionResult OnPostSetGrace(string machine, int graceMinutes)
+        {
+            if (string.IsNullOrWhiteSpace(machine)) return RedirectToPage();
+            if (graceMinutes < 0) graceMinutes = 0;
+            if (graceMinutes > 240) graceMinutes = 240; // sane upper bound
+
+            var p = _policies.GetPolicy(machine);
+            p.ManualUnlockGraceMinutes = graceMinutes;
+            p.Message = $"Manual unlock grace set to {graceMinutes} minute(s)";
             _policies.SetPolicy(machine, p);
 
             return RedirectToPage();

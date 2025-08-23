@@ -45,6 +45,7 @@
                             <div>Last status: @rec.Status.Time.ToLocalTime()</div>
                             <div>Last seen: @rec.LastSeen.ToLocalTime()</div>
                             <div>Allowed until: @(pol?.AllowedUntil.ToLocalTime().ToString() ?? "-")</div>
+                            <div>Manual unlock grace: @(pol?.ManualUnlockGraceMinutes ?? 10) min</div>
                         </div>
 
                         <div class="mt-3">
@@ -69,6 +70,14 @@
                                         <input type="number" name="minutes" value="30" min="1" class="form-control" placeholder="Minutes" />
                                         @Html.AntiForgeryToken()
                                         <button type="submit" class="btn btn-warning">Timer</button>
+                                    </form>
+                                </div>
+                                <div class="col-12">
+                                    <form method="post" asp-page-handler="SetGrace" class="d-flex gap-2">
+                                        <input type="hidden" name="machine" value="@machine" />
+                                        <input type="number" name="graceMinutes" value="@(pol?.ManualUnlockGraceMinutes ?? 10)" min="0" max="240" class="form-control" placeholder="Manual unlock grace (min)" />
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-outline-primary">Save grace</button>
                                     </form>
                                 </div>
                             </div>

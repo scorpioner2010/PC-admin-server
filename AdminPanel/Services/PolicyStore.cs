@@ -4,6 +4,7 @@ namespace AdminPanel.Services
     {
         public DateTimeOffset AllowedUntil { get; set; }
         public bool RequireLock { get; set; }
+        public int ManualUnlockGraceMinutes { get; set; }  // NEW: client uses this when offline manual unlock
         public string? Message { get; set; }
     }
 
@@ -26,6 +27,7 @@ namespace AdminPanel.Services
                 {
                     AllowedUntil = DateTimeOffset.Now.AddHours(1),
                     RequireLock = false,
+                    ManualUnlockGraceMinutes = 10,     // default grace
                     Message = "Default allow 60 min"
                 };
                 _policies[machine] = p;
