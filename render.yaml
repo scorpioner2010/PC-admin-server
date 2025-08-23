@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: dropdude-api
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    ports:
+      - 10000
+    healthCheckPath: /
+    envVars:
+      - key: Jwt__Key
+        value: aVeryLongAndRandomJwtSecretKey_MustBeAtLeast32Chars!
