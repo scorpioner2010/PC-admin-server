@@ -1,0 +1,44 @@
+using System;
+using System.Collections.Generic;
+
+namespace AdminPanel.Services
+{
+    public sealed class AgentPolicy
+    {
+        public DateTimeOffset AllowedUntil { get; set; }
+        public bool RequireLock { get; set; }
+        public string? Message { get; set; }
+    }
+
+    public interface IPolicyStore
+    {
+        AgentPolicy GetPolicy(string machine);
+        void SetPolicy(string machine, AgentPolicy policy);
+    }
+
+    public sealed class PolicyStore : IPolicyStore
+    {
+        private readonly Dictionary<string, AgentPolicy> _policies = new Dictionary<string, AgentPolicy>(StringComparer.OrdinalIgnoreCase);
+
+        public AgentPolicy GetPolicy(string machine)
+        {
+            if (!_policies.TryGetValue(machine, out var p))
+            {
+                // За замовчуванням дозволяємо 60 хвилин
+                p = new AgentPolicy
+                {
+                    AllowedUntil = DateTimeOffset.Now.AddHours(1),
+                    RequireLock = false,
+                    Message = "Default allow 60 min"
+                };
+                _policies[machine] = p;
+            }
+            return p;
+        }
+
+        public void SetPolicy(string machine, AgentPolicy policy)
+        {
+            _policies[machine] = policy;
+        }
+    }
+}
