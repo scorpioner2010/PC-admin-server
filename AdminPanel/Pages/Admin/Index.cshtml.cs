@@ -23,6 +23,9 @@ namespace AdminPanel.Pages.Admin
 
         public void OnGet()
         {
+            // Ensure we don't show agents that haven't reported in >10s
+            _store.Cleanup(TimeSpan.FromSeconds(10));
+
             Agents = _store.Snapshot();
             Policies = Agents.Keys.ToDictionary(k => k, k => _policies.GetPolicy(k),
                 StringComparer.OrdinalIgnoreCase);

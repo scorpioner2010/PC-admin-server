@@ -20,6 +20,7 @@ namespace AdminPanel.Services
     {
         void Upsert(AgentStatus status);
         IReadOnlyDictionary<string, AgentRecord> Snapshot();
+        int Cleanup(TimeSpan maxAge);
     }
 
     public sealed class AgentStore : IAgentStore
@@ -39,5 +40,20 @@ namespace AdminPanel.Services
 
         public IReadOnlyDictionary<string, AgentRecord> Snapshot()
             => new Dictionary<string, AgentRecord>(_agents);
+
+        public int Cleanup(TimeSpan maxAge)
+        {
+            var cutoff = DateTimeOffset.Now - maxAge;
+            int removed = 0;
+            foreach (var kv in _agents)
+            {
+                if (kv.Value.LastSeen < cutoff)
+                {
+                    if (_agents.TryRemove(kv.Key, out _))
+                        removed++;
+                }
+            }
+            return removed;
+        }
     }
 }

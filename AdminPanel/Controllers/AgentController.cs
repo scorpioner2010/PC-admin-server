@@ -40,6 +40,9 @@ namespace AdminPanel.Controllers
                 Time = parsedTime
             });
 
+            // Remove agents that haven't reported within last 10 seconds
+            _store.Cleanup(TimeSpan.FromSeconds(10));
+
             var policy = _policies.GetPolicy(data.Machine);
 
             return Ok(new
