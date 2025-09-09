@@ -18,7 +18,7 @@ ViewData["Title"] = "Admin";
         <div class="card-body py-2">
             <form method="post" asp-page-handler="SetPassword"
                   class="d-flex flex-row flex-wrap align-items-center gap-2 m-0">
-                <div class="small text-muted fw-semibold">Current password</div>
+                <div class="small text-muted">Current password</div>
                 <code class="px-2 py-1 bg-light rounded">@Model.CurrentUnlockPassword</code>
 
                 <div class="vr d-none d-sm-block" style="height:22px;"></div>
@@ -27,7 +27,7 @@ ViewData["Title"] = "Admin";
                        class="form-control form-control-sm"
                        style="max-width:220px" placeholder="New password" />
                 @Html.AntiForgeryToken()
-                <button type="submit" class="btn btn-sm btn-primary fw-bold">Save</button>
+                <button type="submit" class="btn btn-sm btn-primary">Save</button>
 
                 @if (TempData["Msg"] is string msg && !string.IsNullOrWhiteSpace(msg))
                 {
@@ -54,72 +54,45 @@ ViewData["Title"] = "Admin";
         <div class="card admin-card">
             <div class="card-body">
 
-                <!-- ROW 1: name + status + time left -->
-                <div class="d-flex flex-row flex-wrap align-items-center justify-content-between gap-1">
-                    <div class="machine-name ui-font me-2">@rec.Status.Machine</div>
-
-                    <div class="d-flex align-items-center gap-2 ms-auto me-2">
-                        @if (pol?.RequireLock == true)
-                        {
-                        <span class="badge badge-status ui-font bg-danger">LOCK</span>
-                        }
-                        else
-                        {
-                        <span class="badge badge-status ui-font bg-success">OK</span>
-                        }
-                    </div>
-
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="label-timeleft ui-font text-muted fw-bold">Time left</span>
-                        <span class="badge badge-remaining ui-font js-remaining-badge"
-                              data-allowed-until="@allowedIso">--</span>
-                    </div>
+                <!-- ROW 1: Name (bold) + Status -->
+                <div class="pc-row1">
+                    <div class="pc-name ui-font">@rec.Status.Machine</div>
+                    @if (pol?.RequireLock == true)
+                    {
+                    <span class="badge badge-status bg-danger ui-font">LOCK</span>
+                    }
+                    else
+                    {
+                    <span class="badge badge-status bg-success ui-font">OK</span>
+                    }
                 </div>
 
                 <form method="post" class="mt-2">
                     <input type="hidden" name="machine" value="@machine" />
                     @Html.AntiForgeryToken()
 
-                    <!-- ROW 2: Minutes + Pwd time + Pwd Set -->
-                    <div class="row g-1 align-items-stretch">
-                        <div class="col-12 col-md-4">
-                            <div class="input-group input-group-lg tight-input">
-                                <span class="input-group-text fw-bold ui-font">Minutes</span>
-                                <input type="number" name="minutes" value="30" min="0"
-                                       class="form-control ui-font" placeholder="Minutes" />
-                            </div>
+                    <!-- ROW 2: Minutes + Timer -->
+                    <div class="pc-row2 minutes-timer">
+                        <div class="input-group tight-input">
+                            <span class="input-group-text ui-font">Minutes</span>
+                            <input type="number" name="minutes" value="30" min="0"
+                                   class="form-control ui-font" placeholder="Minutes" />
                         </div>
 
-                        <div class="col-12 col-md-5">
-                            <div class="input-group input-group-lg tight-input">
-                                <span class="input-group-text fw-bold ui-font">Pwd time</span>
-                                <input type="number" name="graceMinutes"
-                                       value="@(pol?.ManualUnlockGraceMinutes ?? 60)"
-                                       min="0" max="240"
-                                       class="form-control ui-font" placeholder="Password time (min)" />
-                            </div>
-                        </div>
-
-                        <div class="col-12 col-md-3">
-                            <button type="submit" formaction="?handler=SetGrace"
-                                    class="btn btn-primary btn-lg w-100 touch-44 fw-bold">Set</button>
-                        </div>
+                        <span class="badge badge-remaining ui-font js-remaining-badge"
+                              data-allowed-until="@allowedIso">--</span>
                     </div>
 
                     <!-- ROW 3: Add / Set / Off -->
-                    <div class="row g-1 align-items-stretch mt-2">
-                        <div class="col-12 col-sm-4">
-                            <button type="submit" formaction="?handler=AddTime"
-                                    class="btn btn-success btn-lg w-100 touch-44 fw-bold">Add</button>
-                        </div>
-                        <div class="col-12 col-sm-4">
-                            <button type="submit" formaction="?handler=SetTime"
-                                    class="btn btn-warning btn-lg w-100 touch-44 fw-bold">Set</button>
-                        </div>
-                        <div class="col-12 col-sm-4">
-                            <button type="submit" formaction="?handler=Shutdown"
-                                    class="btn btn-danger btn-lg w-100 touch-44 fw-bold">Off</button>
-                        </div>
+                    <div class="pc-row3">
+                        <button type="submit" formaction="?handler=AddTime"
+                                class="btn btn-success btn-lg w-100 touch-44">Add</button>
+
+                        <button type="submit" formaction="?handler=SetTime"
+                                class="btn btn-warning btn-lg w-100 touch-44">Set</button>
+
+                        <button type="submit" formaction="?handler=Shutdown"
+                                class="btn btn-danger btn-lg w-100 touch-44">Off</button>
                     </div>
                 </form>
             </div>

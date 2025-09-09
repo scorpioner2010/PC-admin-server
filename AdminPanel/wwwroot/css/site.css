@@ -1,4 +1,4 @@
-html { font-size: 14px; }
+html { font-size: 14px; -webkit-text-size-adjust: 100%; }
 @media (min-width: 768px) { html { font-size: 16px; } }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus,
@@ -9,86 +9,97 @@ html { font-size: 14px; }
 html { position: relative; min-height: 100%; }
 body { margin-bottom: 60px; }
 
-/* Базові UI-розміри */
-:root {
-  --uiFont: 1.25rem;                 /* базовий (кнопки/лейбли) */
-  --uiFontLg: calc(var(--uiFont) * 1.20); /* +20% для назви ПК та таймера */
+/* Sizes */
+:root{
+  --uiFont: 1.25rem;
+  --uiFontLg: calc(var(--uiFont) * 1.20); /* +20% for PC name & timer */
 }
 
-/* ---------- СИЛЬНІШЕ ТЕМНИЙ BLUEISH BACKGROUND ---------- */
-.admin-card {
-  border: 1px solid #2a3ea6;        /* ще темніша синювата рамка */
-  background: #b8c6ff;              /* помітно темніший блакитний фон */
+/* Card */
+.admin-card{
+  border: 2px solid #3156d1;
+  background: #c9d4ff;
   border-radius: 12px;
 }
-.admin-card .card-body {
-  padding: .4rem .55rem;            /* щільні відступи */
-}
-.admin-card .row {
-  --bs-gutter-x: .5rem;
-  --bs-gutter-y: .2rem;
-}
+.admin-card .card-body{ padding:.45rem .55rem; }
 
-/* ----- ROW 1 ----- */
-.machine-name { font-size: var(--uiFontLg); font-weight: 800; }      /* +20% */
-.badge-status { font-size: var(--uiFont); padding: .35rem .7rem; border-radius: .6rem; font-weight: 800; }
-.label-timeleft { font-size: var(--uiFont); font-weight: 700; }
+/* Row 1 */
+.pc-row1{
+  display:grid;
+  grid-template-columns: 1fr auto;
+  align-items:center;
+  gap:6px;
+}
+/* ONLY name stays bold */
+.pc-name{ font-size:var(--uiFontLg); font-weight:800; }
 
-/* Таймер — +20% */
-.badge-remaining {
-  font-size: var(--uiFontLg);
-  padding: .5rem 1rem;
-  border-radius: 999px;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  min-width: 8.8ch;
-  text-align: center;
+/* Status badge — normal weight now */
+.badge-status{
+  font-size:var(--uiFont);
+  padding:.3rem .7rem;
+  border-radius:.6rem;
+  font-weight:400;           /* was bold */
 }
 
-/* Кнопки/інпути — одна висота */
-.touch-44 { min-height: 44px; }
-.admin-card .input-group.input-group-lg .form-control,
-.admin-card .input-group.input-group-lg .input-group-text,
-.admin-card .form-control {
-  height: 48px;
-  min-height: 48px;
-  line-height: 1.2;
-  font-size: var(--uiFont);
-  padding-top: .35rem;
-  padding-bottom: .35rem;
+/* Row 2 */
+.pc-row2.minutes-timer{
+  display:grid;
+  grid-template-columns: 1fr auto;
+  gap:6px;
+  align-items:stretch;
+}
+.input-group.tight-input .input-group-text,
+.input-group.tight-input .form-control{
+  padding-top:.28rem; padding-bottom:.28rem;
 }
 
-/* ► ЦИФРИ В ІНПУТАХ — ЩЕ БІЛЬШІ (+50% від бази) ◄ */
+/* Timer pill — +~50% ширше і завжди по центру */
+.badge-remaining{
+  font-size:var(--uiFontLg);
+  padding:.45rem 1.25rem;      /* трохи ширше */
+  border-radius:999px;
+  font-weight:400;             /* normal */
+  font-variant-numeric:tabular-nums;
+  min-width:13.5ch;            /* було ~8.8ch -> +~50% */
+  line-height:1;
+
+  /* центр по вертикалі/горизонталі */
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+}
+
+/* Row 3 buttons */
+.pc-row3{
+  display:grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap:6px;
+  margin-top:.5rem;
+}
+
+/* Control heights */
+.touch-44{ min-height:44px; }
+.admin-card .input-group .form-control,
+.admin-card .input-group .input-group-text{
+  height:48px; min-height:48px; line-height:1.2;
+  font-size:var(--uiFont);
+  font-weight:400;           /* ensure normal weight */
+}
+
+/* Big digits in inputs — but not bold */
 .admin-card input[type="number"],
-.admin-card input[type="tel"] {
-  font-size: calc(var(--uiFont) * 1.5);  /* ще більші числа */
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-}
-.admin-card input[type="number"]::placeholder,
-.admin-card input[type="tel"]::placeholder {
-  font-size: var(--uiFont);
+.admin-card input[type="tel"]{
+  font-size:calc(var(--uiFont) * 1.5);
+  font-weight:400;           /* was 800 */
+  font-variant-numeric:tabular-nums;
 }
 
-/* Підписи/кнопки жирні */
-.admin-card .input-group-text,
-.admin-card .form-label,
-.admin-card .btn { font-weight: 700; }
-
-/* Трохи ущільнюємо input-group */
-.tight-input .input-group-text,
-.tight-input .form-control { padding-top: .3rem; padding-bottom: .3rem; }
-
-/* Посилюємо синій для btn-primary, щоб Set (Pwd time) був явно синій */
-.btn-primary {
-  background-color: #0d6efd;
-  border-color: #0d6efd;
-}
-
-/* Вузькі екрани */
-@media (max-width: 520px){
-  .row.g-1 > [class*="col-"] { margin-bottom: .25rem; }
-}
-@media (max-width: 380px) {
-  .admin-card .card-body { padding: .35rem .5rem; }
+/* дрібна підгонка на дуже вузьких екранах */
+@media (max-width:380px){
+  .admin-card .card-body{ padding:.35rem .45rem; }
+  .badge-remaining{
+    min-width:11ch;          /* щоб не вибігало за край на вузьких */
+    padding:.45rem 1rem;
+  }
 }
