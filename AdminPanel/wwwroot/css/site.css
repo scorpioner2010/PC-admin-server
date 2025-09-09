@@ -1,22 +1,88 @@
-html {
-  font-size: 14px;
-}
+html { font-size: 14px; }
+@media (min-width: 768px) { html { font-size: 16px; } }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus,
+.form-control:focus, .form-check-input:focus {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
-html {
-  position: relative;
-  min-height: 100%;
+html { position: relative; min-height: 100%; }
+body { margin-bottom: 60px; }
+
+/* ---- Admin mobile compaction ---- */
+.admin-card .card-body { padding: .5rem .75rem; }
+
+/* Назва ПК — крупніше */
+.machine-name {
+  font-size: 1.35rem;
+  font-weight: 800;
 }
 
-body {
-  margin-bottom: 60px;
+/* Статус — більший бейдж */
+.badge-status {
+  font-size: 1.15rem;
+  padding: .4rem .75rem;
+  border-radius: .6rem;
+  font-weight: 800;
+}
+
+/* BIG pill timer */
+.badge-remaining {
+  font-size: 1.8rem;
+  padding: .55rem 1.05rem;
+  border-radius: 999px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  min-width: 8.8ch;
+  text-align: center;
+}
+
+/* Підпис "Time left" — більший і жирний */
+.label-timeleft { font-size: 1.1rem; font-weight: 700; }
+
+/* Зручний тап-розмір */
+.touch-44 { min-height: 44px; }
+
+/* Інпути: одна висота з кнопками */
+.admin-card .input-group.input-group-lg .form-control,
+.admin-card .input-group.input-group-lg .input-group-text,
+.admin-card .form-control {
+  height: 48px;
+  min-height: 48px;
+  line-height: 1.2;
+  font-size: 1rem;
+  padding-top: .375rem;
+  padding-bottom: .375rem;
+}
+
+/* ► ЦИФРИ В ІНПУТАХ БІЛЬШІ + ЖИРНІ ◄ */
+.admin-card input[type="number"],
+.admin-card input[type="tel"] {
+  font-size: 1.35rem;            /* ~22px на мобайлі */
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* плейсхолдер теж більший */
+.admin-card input[type="number"]::placeholder,
+.admin-card input[type="tel"]::placeholder {
+  font-size: 1.15rem;
+}
+
+/* підписи/кнопки всередині карток — жирніші */
+.admin-card .input-group-text,
+.admin-card .form-label,
+.admin-card .btn {
+  font-weight: 700;
+}
+
+/* Дуже вузькі екрани */
+@media (max-width: 380px) {
+  .machine-name    { font-size: 1.25rem; }
+  .badge-remaining { font-size: 1.6rem; min-width: 8.2ch; }
+  .badge-status    { font-size: 1.05rem; }
+  .label-timeleft  { font-size: 1rem; }
+  .admin-card .card-body { padding: .45rem .6rem; }
+  .admin-card input[type="number"],
+  .admin-card input[type="tel"] { font-size: 1.25rem; }
 }

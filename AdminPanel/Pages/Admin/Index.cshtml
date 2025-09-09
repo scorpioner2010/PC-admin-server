@@ -18,17 +18,17 @@ ViewData["Title"] = "Admin";
         <div class="card-body py-2">
             <form method="post" asp-page-handler="SetPassword"
                   class="d-flex flex-row flex-wrap align-items-center gap-2 m-0">
-                <div class="small text-muted">Current password</div>
+                <div class="small text-muted fw-bold">Current password</div>
                 <code class="px-2 py-1 bg-light rounded">@Model.CurrentUnlockPassword</code>
 
                 <div class="vr d-none d-sm-block" style="height:22px;"></div>
 
-                <div class="small text-muted">New</div>
+                <div class="small text-muted fw-bold">New</div>
                 <input type="password" name="newPassword"
                        class="form-control form-control-sm"
                        style="max-width:220px" placeholder="New password" />
                 @Html.AntiForgeryToken()
-                <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                <button type="submit" class="btn btn-sm btn-primary fw-bold">Save</button>
 
                 @if (TempData["Msg"] is string msg && !string.IsNullOrWhiteSpace(msg))
                 {
@@ -52,26 +52,26 @@ ViewData["Title"] = "Admin";
         Model.Policies.TryGetValue(machine, out var pol);
         var allowedIso = pol?.AllowedUntil.ToString("O") ?? "";
 
-        <div class="card shadow-sm">
+        <div class="card shadow-sm admin-card">
             <div class="card-body">
 
                 <div class="d-flex flex-row flex-wrap align-items-center justify-content-between gap-2">
-                    <div class="fw-semibold me-2">@rec.Status.Machine</div>
+                    <div class="machine-name">@rec.Status.Machine</div>
 
                     <div class="d-flex align-items-center gap-2 ms-auto me-2">
                         @if (pol?.RequireLock == true)
                         {
-                        <span class="badge bg-danger fs-5 px-3 py-2">LOCK</span>
+                        <span class="badge badge-status bg-danger">LOCK</span>
                         }
                         else
                         {
-                        <span class="badge bg-success fs-5 px-3 py-2">OK</span>
+                        <span class="badge badge-status bg-success">OK</span>
                         }
                     </div>
 
                     <div class="d-flex align-items-center gap-2">
-                        <span class="text-muted small">Time left</span>
-                        <span class="badge rounded-pill px-3 py-2 fs-3 js-remaining-badge"
+                        <span class="label-timeleft fw-bold text-muted">Time left</span>
+                        <span class="badge badge-remaining js-remaining-badge"
                               data-allowed-until="@allowedIso">--</span>
                     </div>
                 </div>
@@ -82,7 +82,7 @@ ViewData["Title"] = "Admin";
 
                     <!-- Minutes -->
                     <div class="input-group input-group-lg mb-2">
-                        <span class="input-group-text">Minutes</span>
+                        <span class="input-group-text fw-bold">Minutes</span>
                         <input type="number" name="minutes" value="30" min="0"
                                class="form-control" placeholder="Minutes" />
                     </div>
@@ -91,35 +91,37 @@ ViewData["Title"] = "Admin";
                     <div class="row g-2">
                         <div class="col-6">
                             <button type="submit" formaction="?handler=AddTime"
-                                    class="btn btn-success btn-lg w-100">Add</button>
+                                    class="btn btn-success btn-lg w-100 fw-bold">Add</button>
                         </div>
                         <div class="col-6">
                             <button type="submit" formaction="?handler=SetTime"
-                                    class="btn btn-warning btn-lg w-100">Set</button>
+                                    class="btn btn-warning btn-lg w-100 fw-bold">Set</button>
                         </div>
                     </div>
 
-                    <!-- ❗ Moved up: Sleep / Shutdown -->
+                    <!-- Sleep / Shutdown -->
                     <div class="row g-2 mt-3">
                         <div class="col-6">
                             <button type="submit" formaction="?handler=Sleep"
-                                    class="btn btn-outline-secondary btn-lg w-100">Sleep</button>
+                                    class="btn btn-outline-secondary btn-lg w-100 fw-bold">Sleep</button>
                         </div>
                         <div class="col-6">
                             <button type="submit" formaction="?handler=Shutdown"
-                                    class="btn btn-outline-danger btn-lg w-100">Shutdown</button>
+                                    class="btn btn-outline-danger btn-lg w-100 fw-bold">Off</button>
                         </div>
                     </div>
 
-                    <!-- ❗ Moved down: Password time -->
+                    <!-- Password time -->
                     <div class="d-flex gap-2 mt-3 align-items-center">
-                        <input type="number" name="graceMinutes"
-                               value="@(pol?.ManualUnlockGraceMinutes ?? 60)"
-                               min="0" max="240"
-                               class="form-control form-control-lg"
-                               placeholder="Password time (min)" />
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text fw-bold">Pwd time</span>
+                            <input type="number" name="graceMinutes"
+                                   value="@(pol?.ManualUnlockGraceMinutes ?? 60)"
+                                   min="0" max="240"
+                                   class="form-control" placeholder="Password time (min)" />
+                        </div>
                         <button type="submit" formaction="?handler=SetGrace"
-                                class="btn btn-outline-primary btn-lg">Password time</button>
+                                class="btn btn-outline-primary btn-lg fw-bold">Set</button>
                     </div>
                 </form>
             </div>
@@ -131,23 +133,23 @@ ViewData["Title"] = "Admin";
 
 @section Scripts {
 <script>
-    (function(){
-        function pad(n){ return n < 10 ? '0'+n : ''+n; }
-        function updateRemaining(){
+    (function () {
+        function pad(n) { return n < 10 ? '0' + n : '' + n; }
+        function updateRemaining() {
             const nodes = document.querySelectorAll('.js-remaining-badge');
             const now = new Date();
-            nodes.forEach(n=>{
+            nodes.forEach(n => {
                 const iso = n.getAttribute('data-allowed-until');
-                n.classList.remove('bg-success','bg-warning','bg-danger','bg-secondary');
-                if(!iso){ n.textContent='-'; n.classList.add('bg-secondary'); return; }
+                n.classList.remove('bg-success', 'bg-warning', 'bg-danger', 'bg-secondary');
+                if (!iso) { n.textContent = '-'; n.classList.add('bg-secondary'); return; }
                 const until = new Date(iso);
-                if(isNaN(until.getTime())){ n.textContent='-'; n.classList.add('bg-secondary'); return; }
+                if (isNaN(until.getTime())) { n.textContent = '-'; n.classList.add('bg-secondary'); return; }
                 let diff = Math.floor((until - now) / 1000);
-                if(diff <= 0){ n.textContent='0s'; n.classList.add('bg-danger'); return; }
-                const h = Math.floor(diff/3600); diff -= h*3600;
-                const m = Math.floor(diff/60); const s = diff - m*60;
-                n.textContent = (h>0 ? (h+'h ') : '') + m + 'm ' + pad(s) + 's';
-                const totalMin = (until - now)/60000;
+                if (diff <= 0) { n.textContent = '0s'; n.classList.add('bg-danger'); return; }
+                const h = Math.floor(diff / 3600); diff -= h * 3600;
+                const m = Math.floor(diff / 60); const s = diff - m * 60;
+                n.textContent = (h > 0 ? (h + 'h ') : '') + m + 'm ' + pad(s) + 's';
+                const totalMin = (until - now) / 60000;
                 if (totalMin > 15) n.classList.add('bg-success');
                 else if (totalMin > 5) n.classList.add('bg-warning');
                 else n.classList.add('bg-danger');
@@ -159,15 +161,15 @@ ViewData["Title"] = "Admin";
         const KEY = 'autoRefresh15Enabled';
         const toggle = document.getElementById('autoRefreshToggle');
         let refreshTimer = null;
-        function startAutoRefresh(){ if(!refreshTimer) refreshTimer = setInterval(()=>location.reload(), 15000); }
-        function stopAutoRefresh(){ if(refreshTimer){ clearInterval(refreshTimer); refreshTimer=null; } }
+        function startAutoRefresh() { if (!refreshTimer) refreshTimer = setInterval(() => location.reload(), 15000); }
+        function stopAutoRefresh() { if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = null; } }
         const saved = localStorage.getItem(KEY);
         const enabled = (saved === null) ? true : saved === '1';
         toggle.checked = enabled;
         if (enabled) startAutoRefresh();
-        toggle.addEventListener('change', function(){
-            if (toggle.checked) { localStorage.setItem(KEY,'1'); startAutoRefresh(); }
-            else { localStorage.setItem(KEY,'0'); stopAutoRefresh(); }
+        toggle.addEventListener('change', function () {
+            if (toggle.checked) { localStorage.setItem(KEY, '1'); startAutoRefresh(); }
+            else { localStorage.setItem(KEY, '0'); stopAutoRefresh(); }
         });
     })();
 </script>
