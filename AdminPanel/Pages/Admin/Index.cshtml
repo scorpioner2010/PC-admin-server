@@ -14,16 +14,15 @@ ViewData["Title"] = "Admin";
         </div>
     </div>
 
-    <div class="card shadow-sm mb-3">
+    <div class="card shadow-sm mb-2">
         <div class="card-body py-2">
             <form method="post" asp-page-handler="SetPassword"
                   class="d-flex flex-row flex-wrap align-items-center gap-2 m-0">
-                <div class="small text-muted fw-bold">Current password</div>
+                <div class="small text-muted fw-semibold">Current password</div>
                 <code class="px-2 py-1 bg-light rounded">@Model.CurrentUnlockPassword</code>
 
                 <div class="vr d-none d-sm-block" style="height:22px;"></div>
 
-                <div class="small text-muted fw-bold">New</div>
                 <input type="password" name="newPassword"
                        class="form-control form-control-sm"
                        style="max-width:220px" placeholder="New password" />
@@ -44,7 +43,7 @@ ViewData["Title"] = "Admin";
     }
     else
     {
-    <div class="d-flex flex-column gap-3">
+    <div class="d-flex flex-column gap-2">
         @foreach (var kv in Model.Agents)
         {
         var machine = kv.Key;
@@ -52,76 +51,75 @@ ViewData["Title"] = "Admin";
         Model.Policies.TryGetValue(machine, out var pol);
         var allowedIso = pol?.AllowedUntil.ToString("O") ?? "";
 
-        <div class="card shadow-sm admin-card">
+        <div class="card admin-card">
             <div class="card-body">
 
-                <div class="d-flex flex-row flex-wrap align-items-center justify-content-between gap-2">
-                    <div class="machine-name">@rec.Status.Machine</div>
+                <!-- ROW 1: name + status + time left -->
+                <div class="d-flex flex-row flex-wrap align-items-center justify-content-between gap-1">
+                    <div class="machine-name ui-font me-2">@rec.Status.Machine</div>
 
                     <div class="d-flex align-items-center gap-2 ms-auto me-2">
                         @if (pol?.RequireLock == true)
                         {
-                        <span class="badge badge-status bg-danger">LOCK</span>
+                        <span class="badge badge-status ui-font bg-danger">LOCK</span>
                         }
                         else
                         {
-                        <span class="badge badge-status bg-success">OK</span>
+                        <span class="badge badge-status ui-font bg-success">OK</span>
                         }
                     </div>
 
                     <div class="d-flex align-items-center gap-2">
-                        <span class="label-timeleft fw-bold text-muted">Time left</span>
-                        <span class="badge badge-remaining js-remaining-badge"
+                        <span class="label-timeleft ui-font text-muted fw-bold">Time left</span>
+                        <span class="badge badge-remaining ui-font js-remaining-badge"
                               data-allowed-until="@allowedIso">--</span>
                     </div>
                 </div>
 
-                <form method="post" class="mt-3">
+                <form method="post" class="mt-2">
                     <input type="hidden" name="machine" value="@machine" />
                     @Html.AntiForgeryToken()
 
-                    <!-- Minutes -->
-                    <div class="input-group input-group-lg mb-2">
-                        <span class="input-group-text fw-bold">Minutes</span>
-                        <input type="number" name="minutes" value="30" min="0"
-                               class="form-control" placeholder="Minutes" />
+                    <!-- ROW 2: Minutes + Pwd time + Pwd Set -->
+                    <div class="row g-1 align-items-stretch">
+                        <div class="col-12 col-md-4">
+                            <div class="input-group input-group-lg tight-input">
+                                <span class="input-group-text fw-bold ui-font">Minutes</span>
+                                <input type="number" name="minutes" value="30" min="0"
+                                       class="form-control ui-font" placeholder="Minutes" />
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-5">
+                            <div class="input-group input-group-lg tight-input">
+                                <span class="input-group-text fw-bold ui-font">Pwd time</span>
+                                <input type="number" name="graceMinutes"
+                                       value="@(pol?.ManualUnlockGraceMinutes ?? 60)"
+                                       min="0" max="240"
+                                       class="form-control ui-font" placeholder="Password time (min)" />
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-3">
+                            <button type="submit" formaction="?handler=SetGrace"
+                                    class="btn btn-primary btn-lg w-100 touch-44 fw-bold">Set</button>
+                        </div>
                     </div>
 
-                    <!-- Add / Set -->
-                    <div class="row g-2">
-                        <div class="col-6">
+                    <!-- ROW 3: Add / Set / Off -->
+                    <div class="row g-1 align-items-stretch mt-2">
+                        <div class="col-12 col-sm-4">
                             <button type="submit" formaction="?handler=AddTime"
-                                    class="btn btn-success btn-lg w-100 fw-bold">Add</button>
+                                    class="btn btn-success btn-lg w-100 touch-44 fw-bold">Add</button>
                         </div>
-                        <div class="col-6">
+                        <div class="col-12 col-sm-4">
                             <button type="submit" formaction="?handler=SetTime"
-                                    class="btn btn-warning btn-lg w-100 fw-bold">Set</button>
+                                    class="btn btn-warning btn-lg w-100 touch-44 fw-bold">Set</button>
                         </div>
-                    </div>
-
-                    <!-- Sleep / Shutdown -->
-                    <div class="row g-2 mt-3">
-                        <div class="col-6">
-                            <button type="submit" formaction="?handler=Sleep"
-                                    class="btn btn-outline-secondary btn-lg w-100 fw-bold">Sleep</button>
-                        </div>
-                        <div class="col-6">
+                        <div class="col-12 col-sm-4">
                             <button type="submit" formaction="?handler=Shutdown"
-                                    class="btn btn-outline-danger btn-lg w-100 fw-bold">Off</button>
+                                    class="btn btn-danger btn-lg w-100 touch-44 fw-bold">Off</button>
                         </div>
-                    </div>
-
-                    <!-- Password time -->
-                    <div class="d-flex gap-2 mt-3 align-items-center">
-                        <div class="input-group input-group-lg">
-                            <span class="input-group-text fw-bold">Pwd time</span>
-                            <input type="number" name="graceMinutes"
-                                   value="@(pol?.ManualUnlockGraceMinutes ?? 60)"
-                                   min="0" max="240"
-                                   class="form-control" placeholder="Password time (min)" />
-                        </div>
-                        <button type="submit" formaction="?handler=SetGrace"
-                                class="btn btn-outline-primary btn-lg fw-bold">Set</button>
                     </div>
                 </form>
             </div>

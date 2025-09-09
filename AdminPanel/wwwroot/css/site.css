@@ -9,80 +9,86 @@ html { font-size: 14px; }
 html { position: relative; min-height: 100%; }
 body { margin-bottom: 60px; }
 
-/* ---- Admin mobile compaction ---- */
-.admin-card .card-body { padding: .5rem .75rem; }
-
-/* Назва ПК — крупніше */
-.machine-name {
-  font-size: 1.35rem;
-  font-weight: 800;
+/* Базові UI-розміри */
+:root {
+  --uiFont: 1.25rem;                 /* базовий (кнопки/лейбли) */
+  --uiFontLg: calc(var(--uiFont) * 1.20); /* +20% для назви ПК та таймера */
 }
 
-/* Статус — більший бейдж */
-.badge-status {
-  font-size: 1.15rem;
-  padding: .4rem .75rem;
-  border-radius: .6rem;
-  font-weight: 800;
+/* ---------- СИЛЬНІШЕ ТЕМНИЙ BLUEISH BACKGROUND ---------- */
+.admin-card {
+  border: 1px solid #2a3ea6;        /* ще темніша синювата рамка */
+  background: #b8c6ff;              /* помітно темніший блакитний фон */
+  border-radius: 12px;
+}
+.admin-card .card-body {
+  padding: .4rem .55rem;            /* щільні відступи */
+}
+.admin-card .row {
+  --bs-gutter-x: .5rem;
+  --bs-gutter-y: .2rem;
 }
 
-/* BIG pill timer */
+/* ----- ROW 1 ----- */
+.machine-name { font-size: var(--uiFontLg); font-weight: 800; }      /* +20% */
+.badge-status { font-size: var(--uiFont); padding: .35rem .7rem; border-radius: .6rem; font-weight: 800; }
+.label-timeleft { font-size: var(--uiFont); font-weight: 700; }
+
+/* Таймер — +20% */
 .badge-remaining {
-  font-size: 1.8rem;
-  padding: .55rem 1.05rem;
+  font-size: var(--uiFontLg);
+  padding: .5rem 1rem;
   border-radius: 999px;
-  font-weight: 900;
+  font-weight: 800;
   font-variant-numeric: tabular-nums;
   min-width: 8.8ch;
   text-align: center;
 }
 
-/* Підпис "Time left" — більший і жирний */
-.label-timeleft { font-size: 1.1rem; font-weight: 700; }
-
-/* Зручний тап-розмір */
+/* Кнопки/інпути — одна висота */
 .touch-44 { min-height: 44px; }
-
-/* Інпути: одна висота з кнопками */
 .admin-card .input-group.input-group-lg .form-control,
 .admin-card .input-group.input-group-lg .input-group-text,
 .admin-card .form-control {
   height: 48px;
   min-height: 48px;
   line-height: 1.2;
-  font-size: 1rem;
-  padding-top: .375rem;
-  padding-bottom: .375rem;
+  font-size: var(--uiFont);
+  padding-top: .35rem;
+  padding-bottom: .35rem;
 }
 
-/* ► ЦИФРИ В ІНПУТАХ БІЛЬШІ + ЖИРНІ ◄ */
+/* ► ЦИФРИ В ІНПУТАХ — ЩЕ БІЛЬШІ (+50% від бази) ◄ */
 .admin-card input[type="number"],
 .admin-card input[type="tel"] {
-  font-size: 1.35rem;            /* ~22px на мобайлі */
-  font-weight: 700;
+  font-size: calc(var(--uiFont) * 1.5);  /* ще більші числа */
+  font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
-
-/* плейсхолдер теж більший */
 .admin-card input[type="number"]::placeholder,
 .admin-card input[type="tel"]::placeholder {
-  font-size: 1.15rem;
+  font-size: var(--uiFont);
 }
 
-/* підписи/кнопки всередині карток — жирніші */
+/* Підписи/кнопки жирні */
 .admin-card .input-group-text,
 .admin-card .form-label,
-.admin-card .btn {
-  font-weight: 700;
+.admin-card .btn { font-weight: 700; }
+
+/* Трохи ущільнюємо input-group */
+.tight-input .input-group-text,
+.tight-input .form-control { padding-top: .3rem; padding-bottom: .3rem; }
+
+/* Посилюємо синій для btn-primary, щоб Set (Pwd time) був явно синій */
+.btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
 }
 
-/* Дуже вузькі екрани */
+/* Вузькі екрани */
+@media (max-width: 520px){
+  .row.g-1 > [class*="col-"] { margin-bottom: .25rem; }
+}
 @media (max-width: 380px) {
-  .machine-name    { font-size: 1.25rem; }
-  .badge-remaining { font-size: 1.6rem; min-width: 8.2ch; }
-  .badge-status    { font-size: 1.05rem; }
-  .label-timeleft  { font-size: 1rem; }
-  .admin-card .card-body { padding: .45rem .6rem; }
-  .admin-card input[type="number"],
-  .admin-card input[type="tel"] { font-size: 1.25rem; }
+  .admin-card .card-body { padding: .35rem .5rem; }
 }
