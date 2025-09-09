@@ -1,11 +1,23 @@
+using System.Collections.Concurrent;
+
 namespace AdminPanel.Services
 {
     public sealed class AgentPolicy
     {
-        public DateTimeOffset AllowedUntil { get; set; }
-        public bool RequireLock { get; set; }
-        public int ManualUnlockGraceMinutes { get; set; }  // NEW: client uses this when offline manual unlock
-        public string? Message { get; set; }
+        public DateTimeOffset AllowedUntil { get; set; } = DateTimeOffset.Now.AddHours(1);
+        public bool RequireLock { get; set; } = false;
+
+        /// <summary>
+        /// Minutes granted when user unlocks with the server password.
+        /// </summary>
+        public int ManualUnlockGraceMinutes { get; set; } = 60;
+
+        /// <summary>
+        /// One-shot command for agent: "sleep" | "shutdown" (cleared after delivery).
+        /// </summary>
+        public string? PendingCommand { get; set; } = null;
+
+        public string Message { get; set; } = "";
     }
 
     public interface IPolicyStore
@@ -16,27 +28,25 @@ namespace AdminPanel.Services
 
     public sealed class PolicyStore : IPolicyStore
     {
-        private readonly Dictionary<string, AgentPolicy> _policies =
+        private readonly ConcurrentDictionary<string, AgentPolicy> _policies =
             new(StringComparer.OrdinalIgnoreCase);
 
         public AgentPolicy GetPolicy(string machine)
         {
-            if (!_policies.TryGetValue(machine, out var p))
+            if (string.IsNullOrWhiteSpace(machine)) machine = "unknown";
+            return _policies.GetOrAdd(machine, _ => new AgentPolicy
             {
-                p = new AgentPolicy
-                {
-                    AllowedUntil = DateTimeOffset.Now.AddHours(1),
-                    RequireLock = false,
-                    ManualUnlockGraceMinutes = 10,     // default grace
-                    Message = "Default allow 60 min"
-                };
-                _policies[machine] = p;
-            }
-            return p;
+                AllowedUntil = DateTimeOffset.Now.AddHours(1),
+                RequireLock = false,
+                ManualUnlockGraceMinutes = 60,
+                PendingCommand = null,
+                Message = "Default policy"
+            });
         }
 
         public void SetPolicy(string machine, AgentPolicy policy)
         {
+            if (string.IsNullOrWhiteSpace(machine)) return;
             _policies[machine] = policy;
         }
     }

@@ -1,20 +1,42 @@
-@page
+@page "/"
 @model AdminPanel.Pages.Admin.IndexModel
 @{
 ViewData["Title"] = "Admin";
 }
 
 <div class="container-fluid px-2">
-    <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between">
-        <h1 class="h3 my-3 mb-sm-0">Admin</h1>
 
-        <!-- Auto-refresh toggle -->
-        <div class="form-check form-switch mt-1">
+    <div class="d-flex flex-row justify-content-between align-items-center my-2">
+        <h1 class="h4 mb-0">Admin</h1>
+        <div class="form-check form-switch m-0">
             <input class="form-check-input" type="checkbox" id="autoRefreshToggle">
-            <label class="form-check-label" for="autoRefreshToggle">Auto-refresh every 15s</label>
+            <label class="form-check-label small" for="autoRefreshToggle">Auto 15s</label>
         </div>
     </div>
-    <p class="text-muted mb-3">Minimal mobile control panel.</p>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-body py-2">
+            <form method="post" asp-page-handler="SetPassword"
+                  class="d-flex flex-row flex-wrap align-items-center gap-2 m-0">
+                <div class="small text-muted">Current password</div>
+                <code class="px-2 py-1 bg-light rounded">@Model.CurrentUnlockPassword</code>
+
+                <div class="vr d-none d-sm-block" style="height:22px;"></div>
+
+                <div class="small text-muted">New</div>
+                <input type="password" name="newPassword"
+                       class="form-control form-control-sm"
+                       style="max-width:220px" placeholder="New password" />
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-sm btn-primary">Save</button>
+
+                @if (TempData["Msg"] is string msg && !string.IsNullOrWhiteSpace(msg))
+                {
+                <span class="text-success small ms-1">@msg</span>
+                }
+            </form>
+        </div>
+    </div>
 
     @if (Model.Agents.Count == 0)
     {
@@ -32,56 +54,74 @@ ViewData["Title"] = "Admin";
 
         <div class="card shadow-sm">
             <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <div class="fw-bold fs-5">@rec.Status.Machine</div>
-                        <div class="text-muted small">OS: @rec.Status.OS</div>
-                    </div>
-                    <div>
+
+                <div class="d-flex flex-row flex-wrap align-items-center justify-content-between gap-2">
+                    <div class="fw-semibold me-2">@rec.Status.Machine</div>
+
+                    <div class="d-flex align-items-center gap-2 ms-auto me-2">
                         @if (pol?.RequireLock == true)
                         {
-                        <span class="badge bg-danger">LOCK</span>
+                        <span class="badge bg-danger fs-5 px-3 py-2">LOCK</span>
                         }
                         else
                         {
-                        <span class="badge bg-success">OK</span>
+                        <span class="badge bg-success fs-5 px-3 py-2">OK</span>
                         }
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-muted small">Time left</span>
+                        <span class="badge rounded-pill px-3 py-2 fs-3 js-remaining-badge"
+                              data-allowed-until="@allowedIso">--</span>
                     </div>
                 </div>
 
-                <!-- TIME LEFT only (prominent) -->
-                <div class="mt-3">
-                    <div class="text-muted mb-1">Time left</div>
-                    <span class="badge rounded-pill px-3 py-2 fs-4 js-remaining-badge"
-                          data-allowed-until="@allowedIso">--</span>
-                </div>
+                <form method="post" class="mt-3">
+                    <input type="hidden" name="machine" value="@machine" />
+                    @Html.AntiForgeryToken()
 
-                <div class="mt-3">
-                    <!-- Single form with one Minutes field and two actions -->
-                    <form method="post" class="d-flex flex-column gap-2">
-                        <input type="hidden" name="machine" value="@machine" />
-                        <div class="input-group">
-                            <span class="input-group-text">Minutes</span>
-                            <input type="number" name="minutes" value="30" min="0" class="form-control" placeholder="Minutes" />
-                        </div>
-                        @Html.AntiForgeryToken()
-                        <div class="d-flex gap-2">
-                            <button type="submit" formaction="?handler=AddTime" class="btn btn-success w-50">Add time</button>
-                            <button type="submit" formaction="?handler=SetTime" class="btn btn-warning w-50">Set time</button>
-                        </div>
+                    <!-- Minutes -->
+                    <div class="input-group input-group-lg mb-2">
+                        <span class="input-group-text">Minutes</span>
+                        <input type="number" name="minutes" value="30" min="0"
+                               class="form-control" placeholder="Minutes" />
+                    </div>
 
-                        <!-- Optional extra actions -->
-                        <div class="d-flex gap-2 mt-2">
-                            <button type="submit" formaction="?handler=Block" class="btn btn-outline-danger w-50">Lock</button>
-                            <button type="submit" formaction="?handler=Unblock" class="btn btn-outline-secondary w-50">Unlock</button>
+                    <!-- Add / Set -->
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <button type="submit" formaction="?handler=AddTime"
+                                    class="btn btn-success btn-lg w-100">Add</button>
                         </div>
+                        <div class="col-6">
+                            <button type="submit" formaction="?handler=SetTime"
+                                    class="btn btn-warning btn-lg w-100">Set</button>
+                        </div>
+                    </div>
 
-                        <div class="d-flex gap-2 mt-2">
-                            <input type="number" name="graceMinutes" value="@(pol?.ManualUnlockGraceMinutes ?? 10)" min="0" max="240" class="form-control" placeholder="Manual unlock grace (min)" />
-                            <button type="submit" formaction="?handler=SetGrace" class="btn btn-outline-primary">Save grace</button>
+                    <!-- ❗ Moved up: Sleep / Shutdown -->
+                    <div class="row g-2 mt-3">
+                        <div class="col-6">
+                            <button type="submit" formaction="?handler=Sleep"
+                                    class="btn btn-outline-secondary btn-lg w-100">Sleep</button>
                         </div>
-                    </form>
-                </div>
+                        <div class="col-6">
+                            <button type="submit" formaction="?handler=Shutdown"
+                                    class="btn btn-outline-danger btn-lg w-100">Shutdown</button>
+                        </div>
+                    </div>
+
+                    <!-- ❗ Moved down: Password time -->
+                    <div class="d-flex gap-2 mt-3 align-items-center">
+                        <input type="number" name="graceMinutes"
+                               value="@(pol?.ManualUnlockGraceMinutes ?? 60)"
+                               min="0" max="240"
+                               class="form-control form-control-lg"
+                               placeholder="Password time (min)" />
+                        <button type="submit" formaction="?handler=SetGrace"
+                                class="btn btn-outline-primary btn-lg">Password time</button>
+                    </div>
+                </form>
             </div>
         </div>
         }
@@ -93,71 +133,41 @@ ViewData["Title"] = "Admin";
 <script>
     (function(){
         function pad(n){ return n < 10 ? '0'+n : ''+n; }
-
         function updateRemaining(){
             const nodes = document.querySelectorAll('.js-remaining-badge');
             const now = new Date();
-
             nodes.forEach(n=>{
                 const iso = n.getAttribute('data-allowed-until');
-                // reset classes
                 n.classList.remove('bg-success','bg-warning','bg-danger','bg-secondary');
-
-                if(!iso){ n.textContent = '-'; n.classList.add('bg-secondary'); return; }
+                if(!iso){ n.textContent='-'; n.classList.add('bg-secondary'); return; }
                 const until = new Date(iso);
-                if(isNaN(until.getTime())){ n.textContent = '-'; n.classList.add('bg-secondary'); return; }
-
+                if(isNaN(until.getTime())){ n.textContent='-'; n.classList.add('bg-secondary'); return; }
                 let diff = Math.floor((until - now) / 1000);
-                if(diff <= 0){ n.textContent = '0s'; n.classList.add('bg-danger'); return; }
-
-                const h = Math.floor(diff / 3600);
-                diff -= h*3600;
-                const m = Math.floor(diff / 60);
-                const s = diff - m*60;
-
-                // Text: HH:MM:SS if >=1h, else MM:SS
+                if(diff <= 0){ n.textContent='0s'; n.classList.add('bg-danger'); return; }
+                const h = Math.floor(diff/3600); diff -= h*3600;
+                const m = Math.floor(diff/60); const s = diff - m*60;
                 n.textContent = (h>0 ? (h+'h ') : '') + m + 'm ' + pad(s) + 's';
-
-                // Color thresholds: >15m green, 15–5m warning, <5m danger
-                const totalMin = (until - now) / 60000;
+                const totalMin = (until - now)/60000;
                 if (totalMin > 15) n.classList.add('bg-success');
                 else if (totalMin > 5) n.classList.add('bg-warning');
                 else n.classList.add('bg-danger');
             });
         }
-
         updateRemaining();
         setInterval(updateRemaining, 1000);
 
-        // --- auto-refresh toggle (localStorage) ---
         const KEY = 'autoRefresh15Enabled';
         const toggle = document.getElementById('autoRefreshToggle');
         let refreshTimer = null;
-
-        function startAutoRefresh(){
-            if (refreshTimer) return;
-            refreshTimer = setInterval(function(){ location.reload(); }, 15000);
-        }
-        function stopAutoRefresh(){
-            if (!refreshTimer) return;
-            clearInterval(refreshTimer);
-            refreshTimer = null;
-        }
-
-        // default: enabled
+        function startAutoRefresh(){ if(!refreshTimer) refreshTimer = setInterval(()=>location.reload(), 15000); }
+        function stopAutoRefresh(){ if(refreshTimer){ clearInterval(refreshTimer); refreshTimer=null; } }
         const saved = localStorage.getItem(KEY);
         const enabled = (saved === null) ? true : saved === '1';
         toggle.checked = enabled;
         if (enabled) startAutoRefresh();
-
         toggle.addEventListener('change', function(){
-            if (toggle.checked) {
-                localStorage.setItem(KEY, '1');
-                startAutoRefresh();
-            } else {
-                localStorage.setItem(KEY, '0');
-                stopAutoRefresh();
-            }
+            if (toggle.checked) { localStorage.setItem(KEY,'1'); startAutoRefresh(); }
+            else { localStorage.setItem(KEY,'0'); stopAutoRefresh(); }
         });
     })();
 </script>
