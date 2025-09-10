@@ -79,20 +79,20 @@ ViewData["Title"] = "Admin";
                                    class="form-control ui-font" placeholder="Minutes" />
                         </div>
 
-                        <span class="badge badge-remaining ui-font js-remaining-badge"
+                        <span class="badge badge-remaining square-timer ui-font js-remaining-badge"
                               data-allowed-until="@allowedIso">--</span>
                     </div>
 
                     <!-- ROW 3: Add / Set / Off -->
                     <div class="pc-row3">
                         <button type="submit" formaction="?handler=AddTime"
-                                class="btn btn-success btn-lg w-100 touch-44">Add</button>
+                                class="btn btn-lg btn-grad-main w-100 touch-44">Add</button>
 
                         <button type="submit" formaction="?handler=SetTime"
-                                class="btn btn-warning btn-lg w-100 touch-44">Set</button>
+                                class="btn btn-lg btn-grad-main w-100 touch-44">Set</button>
 
                         <button type="submit" formaction="?handler=Shutdown"
-                                class="btn btn-danger btn-lg w-100 touch-44">Off</button>
+                                class="btn btn-lg btn-off-black w-100 touch-44">Off</button>
                     </div>
                 </form>
             </div>
