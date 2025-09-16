@@ -21,8 +21,8 @@ namespace AdminPanel.Services
         // пароль, який ми також віддаємо в policy
         public string UnlockPassword { get; set; } = "7789Saurex";
 
-        // НОВЕ: поточна гучність (0..100)
-        public int VolumePercent { get; set; } = 50;
+        // ДЕФОЛТ: 75% (було 50)
+        public int VolumePercent { get; set; } = 75;
     }
 
     public class PolicyStore : IPolicyStore

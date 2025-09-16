@@ -11,7 +11,7 @@ body { margin-bottom: 60px; }
 
 /* Sizes */
 :root{
-  --uiFont: 1.15rem;
+  --uiFont: 1.1rem;
   --uiFontLg: calc(var(--uiFont) * 1.18);
 }
 
@@ -62,27 +62,36 @@ body { margin-bottom: 60px; }
 .pc-vol-wrap{
   display:flex; align-items:center;
   min-width: 200px;
+  gap:8px;
+  white-space:nowrap; /* важливо: не переносити 100% */
 }
 .vol-h{
   width: 100%;
   height: 28px;
   margin: 0;
 }
-.vol-out{ min-width:2.5ch; display:inline-block; text-align:right; }
+.vol-readout{
+  display:inline-flex; align-items:center; gap:4px;
+  white-space:nowrap;
+}
+.vol-out{
+  display:inline-block;
+  min-width: 4ch;   /* влазить '100' */
+  text-align: right;
+}
+.vol-unit{ display:inline-block; }
 
-/* Row B layout: [Minutes fixed] | [Add frac] | [Set frac] | [Timer auto] | [Off auto] */
+/* Row B */
 .pc-rowB{
   display:grid;
-  grid-template-columns: max-content 1fr 1fr auto auto;
+  grid-template-columns: max-content 1fr 1fr;
   gap:10px;
   align-items:center;
   margin-top:.30rem;
 }
-
-/* Minutes group: fixed to fit 9999 exactly, no stretching */
 .minutes-group{ width: max-content; }
 .minutes-input{
-  width: 6.5ch;            /* влізе 9999 без запасу */
+  width: 6.5ch;             /* рівно під 9999 */
   max-width: 6.5ch;
   text-align: right;
 }
@@ -95,21 +104,33 @@ body { margin-bottom: 60px; }
   font-size:var(--uiFont);
 }
 
-/* Remaining badge */
+/* Row C: Timer | Off */
+.pc-rowC{
+  display:grid;
+  grid-template-columns: 1fr auto;
+  gap:10px;
+  align-items:center;
+  margin-top:.30rem;
+}
+.touch-36{ min-height:36px; }
+
+/* Таймер = по висоті Off */
 .badge-remaining{
+  height:36px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  padding:0 .75rem;
   font-size:var(--uiFont);
-  padding:.30rem .75rem;
   border-radius:10px;
   font-weight:700;
   font-variant-numeric:tabular-nums;
   min-width:11.5ch;
   line-height:1;
-  display:inline-flex; align-items:center; justify-content:center;
-  text-align:center;
+  text-align:left;
 }
 
 /* Buttons */
-.touch-36{ min-height:36px; }
 .btn-gradient-blue{
   color:#fff; border:0;
   background: linear-gradient(135deg,#0a3ea8,#2f7cff);
@@ -118,19 +139,9 @@ body { margin-bottom: 60px; }
 .btn-dark{ color:#fff; }
 .btn-off{ white-space:nowrap; }
 
-/* narrow */
-@media (max-width:640px){
-  .pc-rowB{
-    grid-template-columns: max-content 1fr 1fr auto auto;
-    gap:6px;
-  }
+/* Responsive tweaks */
+@media (max-width:520px){
   .pc-name{ max-width: 20ch; }
-}
-@media (max-width:460px){
-  /* у дуже вузьких — таймер на новий ряд */
-  .pc-rowB{
-    grid-template-columns: max-content 1fr 1fr auto;
-    grid-auto-rows: auto;
-  }
-  .badge-remaining{ grid-column: 1 / -2; justify-self:start; margin-top:4px; }
+  .pc-rowB{ gap:6px; }
+  .pc-rowC{ gap:6px; }
 }

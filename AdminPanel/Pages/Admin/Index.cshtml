@@ -56,7 +56,7 @@ var tokens = Antiforgery.GetAndStoreTokens(HttpContext);
         var rec = kv.Value;
         Model.Policies.TryGetValue(machine, out var pol);
         var allowedIso = pol?.AllowedUntil.ToString("O") ?? "";
-        var volume = pol?.VolumePercent ?? 50;  // адмін диктує
+        var volume = pol?.VolumePercent ?? 75;  // дефолт 75%
         bool online = rec.IsOnline;
 
         <div class="card admin-card @(online ? "" : "admin-card-offline")">
@@ -77,9 +77,11 @@ var tokens = Antiforgery.GetAndStoreTokens(HttpContext);
                                    name="volume"
                                    value="@volume"
                                    @(online ? null : "disabled")
-                                   oninput="this.nextElementSibling.value=this.value"
+                                   oninput="updateVolReadout(this)"
                                    onchange="if(isOnline('@online')) submitVolume('@machine', this.value)" />
-                            <output class="vol-out ms-2">@volume</output><span class="ms-1">%</span>
+                            <span class="vol-readout">
+                                        <output class="vol-out">@volume</output><span class="vol-unit">%</span>
+                                    </span>
                         </div>
 
                         @if (online)
@@ -92,7 +94,7 @@ var tokens = Antiforgery.GetAndStoreTokens(HttpContext);
                         }
                     </div>
 
-                    <!-- ROW B: [Minutes fixed] | [Add] | [Set] | [Timer] | [Off] -->
+                    <!-- ROW B: Minutes | Add | Set -->
                     <div class="pc-rowB">
                         <div class="input-group tight-input minutes-group">
                             <span class="input-group-text ui-font">Minutes</span>
@@ -101,7 +103,7 @@ var tokens = Antiforgery.GetAndStoreTokens(HttpContext);
                                    value="30"
                                    min="0"
                                    class="form-control ui-font minutes-input"
-                                   placeholder="Minutes"
+                                   placeholder="0"
                                    @(online ? null : "disabled") />
                         </div>
 
@@ -114,9 +116,12 @@ var tokens = Antiforgery.GetAndStoreTokens(HttpContext);
                                 formaction="?handler=SetTime"
                                 class="btn btn-gradient-blue btn-sm touch-36 w-100"
                                 @(online ? null : "disabled")>Set</button>
+                    </div>
 
-                        <span class="badge badge-remaining ui-font js-remaining-badge"
-                              data-allowed-until="@allowedIso">--</span>
+                    <!-- ROW C: Timer | Off -->
+                    <div class="pc-rowC">
+                                <span class="badge badge-remaining ui-font js-remaining-badge"
+                                      data-allowed-until="@allowedIso">--</span>
 
                         <button type="submit"
                                 formaction="?handler=Shutdown"
@@ -136,6 +141,13 @@ var tokens = Antiforgery.GetAndStoreTokens(HttpContext);
 <script>
     function isOnline(flagStr){
         return flagStr === 'True';
+    }
+
+    function updateVolReadout(input){
+        try{
+            const wrap = input.parentElement.querySelector('.vol-out');
+            if(wrap){ wrap.value = input.value; }
+        }catch(e){ /* ignore */ }
     }
 
     async function submitVolume(machine, value){
