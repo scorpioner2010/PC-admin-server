@@ -1,23 +1,24 @@
 namespace AdminPanel.Services
 {
-    /// <summary>
-    /// Global admin settings shared by all machines.
-    /// Holds a single UnlockPassword used by clients.
-    /// </summary>
     public interface ISettingsStore
     {
-        string UnlockPassword { get; set; }
+        string UnlockPassword { get; }
+        int ManualUnlockMinutes { get; } // якщо потрібно далі
+        void SetUnlockPassword(string value);
     }
 
-    public sealed class SettingsStore : ISettingsStore
+    public class SettingsStore : ISettingsStore
     {
-        private readonly object _sync = new();
-        private string _unlockPassword = "admin123"; // default; editable via Admin UI later
+        // дефолтний пароль
+        private string _unlockPassword = "7789Saurex";
+        public string UnlockPassword => _unlockPassword;
 
-        public string UnlockPassword
+        public int ManualUnlockMinutes { get; } = 60;
+
+        public void SetUnlockPassword(string value)
         {
-            get { lock (_sync) return _unlockPassword; }
-            set { lock (_sync) _unlockPassword = value ?? string.Empty; }
+            if (!string.IsNullOrWhiteSpace(value))
+                _unlockPassword = value;
         }
     }
 }

@@ -1,13 +1,19 @@
 @page "/"
 @model AdminPanel.Pages.Admin.IndexModel
+@using Microsoft.AspNetCore.Antiforgery
+@inject IAntiforgery Antiforgery
+
 @{
 ViewData["Title"] = "Admin";
+var tokens = Antiforgery.GetAndStoreTokens(HttpContext);
 }
 
 <div class="container-fluid px-2">
 
+    <input type="hidden" id="__RequestVerificationToken" value="@tokens.RequestToken" />
+
     <div class="d-flex flex-row justify-content-between align-items-center my-2">
-        <h1 class="h4 mb-0">Admin</h1>
+        <h1 class="h5 mb-0">Admin</h1>
         <div class="form-check form-switch m-0">
             <input class="form-check-input" type="checkbox" id="autoRefreshToggle">
             <label class="form-check-label small" for="autoRefreshToggle">Auto 15s</label>
@@ -50,51 +56,75 @@ ViewData["Title"] = "Admin";
         var rec = kv.Value;
         Model.Policies.TryGetValue(machine, out var pol);
         var allowedIso = pol?.AllowedUntil.ToString("O") ?? "";
+        var volume = pol?.VolumePercent ?? 50;  // адмін диктує
+        bool online = rec.IsOnline;
 
-        <div class="card admin-card">
+        <div class="card admin-card @(online ? "" : "admin-card-offline")">
             <div class="card-body">
 
-                <!-- ROW 1: Name (bold) + Status -->
-                <div class="pc-row1">
-                    <div class="pc-name ui-font">@rec.Status.Machine</div>
-                    @if (pol?.RequireLock == true)
-                    {
-                    <span class="badge badge-status bg-danger ui-font">LOCK</span>
-                    }
-                    else
-                    {
-                    <span class="badge badge-status bg-success ui-font">OK</span>
-                    }
-                </div>
-
-                <form method="post" class="mt-2">
+                <form method="post" class="m-0">
                     <input type="hidden" name="machine" value="@machine" />
                     @Html.AntiForgeryToken()
 
-                    <!-- ROW 2: Minutes + Timer -->
-                    <div class="pc-row2 minutes-timer">
-                        <div class="input-group tight-input">
-                            <span class="input-group-text ui-font">Minutes</span>
-                            <input type="number" name="minutes" value="30" min="0"
-                                   class="form-control ui-font" placeholder="Minutes" />
+                    <!-- ROW A: Name | horizontal Volume | Status -->
+                    <div class="pc-rowA">
+                        <div class="pc-name ui-font" title="@rec.Status.OS">@rec.Status.Machine</div>
+
+                        <div class="pc-vol-wrap">
+                            <input type="range"
+                                   class="form-range vol-h"
+                                   min="0" max="100" step="1"
+                                   name="volume"
+                                   value="@volume"
+                                   @(online ? null : "disabled")
+                                   oninput="this.nextElementSibling.value=this.value"
+                                   onchange="if(isOnline('@online')) submitVolume('@machine', this.value)" />
+                            <output class="vol-out ms-2">@volume</output><span class="ms-1">%</span>
                         </div>
 
-                        <span class="badge badge-remaining square-timer ui-font js-remaining-badge"
-                              data-allowed-until="@allowedIso">--</span>
+                        @if (online)
+                        {
+                        <span class="badge badge-status bg-success ui-font">ONLINE</span>
+                        }
+                        else
+                        {
+                        <span class="badge badge-status bg-secondary ui-font">OFFLINE</span>
+                        }
                     </div>
 
-                    <!-- ROW 3: Add / Set / Off -->
-                    <div class="pc-row3">
-                        <button type="submit" formaction="?handler=AddTime"
-                                class="btn btn-lg btn-grad-main w-100 touch-44">Add</button>
+                    <!-- ROW B: [Minutes fixed] | [Add] | [Set] | [Timer] | [Off] -->
+                    <div class="pc-rowB">
+                        <div class="input-group tight-input minutes-group">
+                            <span class="input-group-text ui-font">Minutes</span>
+                            <input type="number"
+                                   name="minutes"
+                                   value="30"
+                                   min="0"
+                                   class="form-control ui-font minutes-input"
+                                   placeholder="Minutes"
+                                   @(online ? null : "disabled") />
+                        </div>
 
-                        <button type="submit" formaction="?handler=SetTime"
-                                class="btn btn-lg btn-grad-main w-100 touch-44">Set</button>
+                        <button type="submit"
+                                formaction="?handler=AddTime"
+                                class="btn btn-gradient-blue btn-sm touch-36 w-100"
+                                @(online ? null : "disabled")>Add</button>
 
-                        <button type="submit" formaction="?handler=Shutdown"
-                                class="btn btn-lg btn-off-black w-100 touch-44">Off</button>
+                        <button type="submit"
+                                formaction="?handler=SetTime"
+                                class="btn btn-gradient-blue btn-sm touch-36 w-100"
+                                @(online ? null : "disabled")>Set</button>
+
+                        <span class="badge badge-remaining ui-font js-remaining-badge"
+                              data-allowed-until="@allowedIso">--</span>
+
+                        <button type="submit"
+                                formaction="?handler=Shutdown"
+                                class="btn btn-dark btn-sm touch-36 btn-off"
+                                @(online ? null : "disabled")>Off</button>
                     </div>
                 </form>
+
             </div>
         </div>
         }
@@ -104,6 +134,26 @@ ViewData["Title"] = "Admin";
 
 @section Scripts {
 <script>
+    function isOnline(flagStr){
+        return flagStr === 'True';
+    }
+
+    async function submitVolume(machine, value){
+        try{
+            const token = document.getElementById('__RequestVerificationToken')?.value || '';
+            const form = new FormData();
+            form.append('machine', machine);
+            form.append('volume', value);
+
+            await fetch('?handler=SetVolume', {
+                method:'POST',
+                body: form,
+                credentials:'same-origin',
+                headers: { 'RequestVerificationToken': token }
+            });
+        }catch(e){ console.error(e); }
+    }
+
     (function () {
         function pad(n) { return n < 10 ? '0' + n : '' + n; }
         function updateRemaining() {
@@ -117,15 +167,18 @@ ViewData["Title"] = "Admin";
                 if (isNaN(until.getTime())) { n.textContent = '-'; n.classList.add('bg-secondary'); return; }
                 let diff = Math.floor((until - now) / 1000);
                 if (diff <= 0) { n.textContent = '0s'; n.classList.add('bg-danger'); return; }
+
                 const h = Math.floor(diff / 3600); diff -= h * 3600;
                 const m = Math.floor(diff / 60); const s = diff - m * 60;
                 n.textContent = (h > 0 ? (h + 'h ') : '') + m + 'm ' + pad(s) + 's';
+
                 const totalMin = (until - now) / 60000;
                 if (totalMin > 15) n.classList.add('bg-success');
                 else if (totalMin > 5) n.classList.add('bg-warning');
                 else n.classList.add('bg-danger');
             });
         }
+
         updateRemaining();
         setInterval(updateRemaining, 1000);
 

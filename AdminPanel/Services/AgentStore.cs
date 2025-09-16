@@ -1,59 +1,70 @@
+using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace AdminPanel.Services
 {
-    public sealed class AgentStatus
+    public interface IAgentStore
+    {
+        /// <summary>Додати/оновити запис про ПК.</summary>
+        void Upsert(string machine, string os, DateTimeOffset nowUtc, long? uptimeSec = null);
+
+        /// <summary>Отримати ВСІ відомі ПК (онлайн і офлайн). Копія для читання.</summary>
+        Dictionary<string, AgentRecord> GetAll();
+    }
+
+    public class AgentStatus
     {
         public string Machine { get; set; } = "";
         public string OS { get; set; } = "";
         public long UptimeSec { get; set; }
-        public DateTimeOffset Time { get; set; }
     }
 
-    public sealed class AgentRecord
+    public class AgentRecord
     {
+        private const int OnlineWindowSeconds = 15; // якщо бачили за останні 15 с — ONLINE
+
         public AgentStatus Status { get; set; } = new AgentStatus();
-        public DateTimeOffset LastSeen { get; set; }
+        public DateTimeOffset LastSeenUtc { get; set; }
+
+        /// <summary>Онлайн, якщо бачили за останні OnlineWindowSeconds.</summary>
+        public bool IsOnline =>
+            (DateTimeOffset.UtcNow - LastSeenUtc) <= TimeSpan.FromSeconds(OnlineWindowSeconds);
     }
 
-    public interface IAgentStore
+    public class AgentStore : IAgentStore
     {
-        void Upsert(AgentStatus status);
-        IReadOnlyDictionary<string, AgentRecord> Snapshot();
-        int Cleanup(TimeSpan maxAge);
-    }
+        private readonly ConcurrentDictionary<string, AgentRecord> _agents = new();
 
-    public sealed class AgentStore : IAgentStore
-    {
-        private readonly ConcurrentDictionary<string, AgentRecord> _agents =
-            new(StringComparer.OrdinalIgnoreCase);
-
-        public void Upsert(AgentStatus status)
+        public void Upsert(string machine, string os, DateTimeOffset nowUtc, long? uptimeSec = null)
         {
-            var rec = new AgentRecord
+            var rec = _agents.GetOrAdd(machine, _ => new AgentRecord
             {
-                Status = status,
-                LastSeen = DateTimeOffset.Now
-            };
-            _agents.AddOrUpdate(status.Machine, rec, (_, __) => rec);
+                Status = new AgentStatus { Machine = machine }
+            });
+
+            rec.Status.Machine = machine;
+            rec.Status.OS = os ?? "";
+            if (uptimeSec.HasValue) rec.Status.UptimeSec = uptimeSec.Value;
+            rec.LastSeenUtc = nowUtc;
         }
 
-        public IReadOnlyDictionary<string, AgentRecord> Snapshot()
-            => new Dictionary<string, AgentRecord>(_agents);
-
-        public int Cleanup(TimeSpan maxAge)
+        public Dictionary<string, AgentRecord> GetAll()
         {
-            var cutoff = DateTimeOffset.Now - maxAge;
-            int removed = 0;
-            foreach (var kv in _agents)
-            {
-                if (kv.Value.LastSeen < cutoff)
+            // повертаємо копії, щоб зовні не змінювали наші об’єкти
+            return _agents.ToDictionary(
+                kv => kv.Key,
+                kv => new AgentRecord
                 {
-                    if (_agents.TryRemove(kv.Key, out _))
-                        removed++;
-                }
-            }
-            return removed;
+                    Status = new AgentStatus
+                    {
+                        Machine = kv.Value.Status.Machine,
+                        OS = kv.Value.Status.OS,
+                        UptimeSec = kv.Value.Status.UptimeSec
+                    },
+                    LastSeenUtc = kv.Value.LastSeenUtc
+                });
         }
     }
 }

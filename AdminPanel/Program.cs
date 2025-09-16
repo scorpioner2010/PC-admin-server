@@ -6,12 +6,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 
-// In-memory stores
+// Stores
 builder.Services.AddSingleton<IAgentStore, AgentStore>();
 builder.Services.AddSingleton<IPolicyStore, PolicyStore>();
+builder.Services.AddSingleton<ISettingsStore, SettingsStore>();
 
-// NEW: global settings (unlock password)
-builder.Services.AddSingleton<ISettingsStore, SettingsStore>(); // <-- added
+// NEW: командна черга для миттєвих команд (Shutdown, SetVolume)
+builder.Services.AddSingleton<ICommandsQueue, CommandsQueue>();
 
 var app = builder.Build();
 

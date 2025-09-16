@@ -1,70 +1,52 @@
-using AdminPanel.Services;
+using System;
 using Microsoft.AspNetCore.Mvc;
+using AdminPanel.Services;
 
 namespace AdminPanel.Controllers
 {
-    public sealed class AgentStatusDto
-    {
-        public string? Machine { get; set; }
-        public string? OS { get; set; }
-        public long UptimeSec { get; set; }
-        public string? Time { get; set; }   // ISO8601 string
-    }
-
-    public sealed class UnlockRequestDto
-    {
-        public string? Machine { get; set; }
-        public string? Password { get; set; }
-    }
-
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/agent")]
     public class AgentController : ControllerBase
     {
-        private readonly IAgentStore _store;
+        private readonly IAgentStore _agents;
         private readonly IPolicyStore _policies;
         private readonly ISettingsStore _settings;
+        private readonly ICommandsQueue _commands;
 
-        public AgentController(IAgentStore store, IPolicyStore policies, ISettingsStore settings)
+        public AgentController(IAgentStore agents, IPolicyStore policies, ISettingsStore settings, ICommandsQueue commands)
         {
-            _store = store;
+            _agents = agents;
             _policies = policies;
             _settings = settings;
+            _commands = commands;
+        }
+
+        public class AgentStatusDto
+        {
+            public string Machine { get; set; } = "";
+            public string OS { get; set; } = "";
+            public long UptimeSec { get; set; }
+            public string Time { get; set; } = "";
         }
 
         [HttpPost("status")]
-        public IActionResult Status([FromBody] AgentStatusDto dto)
+        public IActionResult Status([FromBody] AgentStatusDto status)
         {
-            if (dto is null || string.IsNullOrWhiteSpace(dto.Machine))
-                return BadRequest(new { error = "Invalid payload" });
+            if (string.IsNullOrWhiteSpace(status.Machine))
+                return BadRequest(new { message = "Machine required" });
 
-            var machine = dto.Machine.Trim();
-
-            // ✅ DTO -> Services.AgentStatus (Time як DateTimeOffset)
-            DateTimeOffset when;
-            if (!DateTimeOffset.TryParse(dto.Time, out when))
-                when = DateTimeOffset.Now;
-
-            var status = new AgentStatus
-            {
-                Machine = machine,
-                OS = dto.OS ?? string.Empty,
-                UptimeSec = dto.UptimeSec,
-                Time = when
-            };
+            var now = DateTimeOffset.UtcNow;
 
             // зберегти останній статус
-            _store.Upsert(status);
+            _agents.Upsert(status.Machine, status.OS, now);
 
-            // політика + одноразова команда
-            var policy = _policies.GetPolicy(machine);
+            // отримати/оновити політику
+            var policy = _policies.GetPolicy(status.Machine);
+            policy.UnlockPassword = _settings.UnlockPassword;
+            policy.ManualUnlockGraceMinutes = _settings.ManualUnlockMinutes;
 
-            string? command = policy.PendingCommand;
-            if (!string.IsNullOrWhiteSpace(command))
-            {
-                policy.PendingCommand = null;     // очистити після доставки
-                _policies.SetPolicy(machine, policy);
-            }
+            // видати policy + команди агенту
+            var cmds = _commands.DequeueAll(status.Machine);
 
             return Ok(new
             {
@@ -72,41 +54,39 @@ namespace AdminPanel.Controllers
                 policy = new
                 {
                     allowedUntil = policy.AllowedUntil.ToString("O"),
-                    requireLock  = policy.RequireLock,
+                    requireLock = policy.RequireLock,
                     manualUnlockGraceMinutes = policy.ManualUnlockGraceMinutes,
-                    unlockPassword = _settings.UnlockPassword ?? string.Empty
+                    unlockPassword = policy.UnlockPassword,
+                    volumePercent = policy.VolumePercent
                 },
-                command
+                commands = cmds
             });
         }
 
-        [HttpPost("unlock")]
-        public IActionResult Unlock([FromBody] UnlockRequestDto dto)
+        // (не обов'язково) окремий unlock, якщо агент його викликає
+        public class UnlockDto
         {
-            if (dto is null || string.IsNullOrWhiteSpace(dto.Machine))
-                return BadRequest(new { error = "Invalid payload" });
+            public string Machine { get; set; } = "";
+            public string Password { get; set; } = "";
+        }
 
-            var expected = _settings.UnlockPassword ?? string.Empty;
-            if (!string.Equals(dto.Password ?? string.Empty, expected, StringComparison.Ordinal))
-                return Unauthorized(new { error = "Wrong password" });
-
-            var machine = dto.Machine.Trim();
-            var p = _policies.GetPolicy(machine);
-            p.RequireLock  = false;
-            p.AllowedUntil = DateTimeOffset.Now.AddMinutes(p.ManualUnlockGraceMinutes);
-            p.Message      = "Manual unlock";
-            _policies.SetPolicy(machine, p);
-
-            return Ok(new
+        [HttpPost("unlock")]
+        public IActionResult Unlock([FromBody] UnlockDto dto)
+        {
+            var policy = _policies.GetPolicy(dto.Machine);
+            if (dto.Password == _settings.UnlockPassword)
             {
-                message = "Unlocked",
-                policy = new
+                policy.AllowedUntil = DateTimeOffset.UtcNow.AddMinutes(_settings.ManualUnlockMinutes);
+                return Ok(new
                 {
-                    allowedUntil = p.AllowedUntil.ToString("O"),
-                    requireLock  = p.RequireLock,
-                    manualUnlockGraceMinutes = p.ManualUnlockGraceMinutes
-                }
-            });
+                    message = "Unlocked",
+                    policy = new
+                    {
+                        allowedUntil = policy.AllowedUntil.ToString("O")
+                    }
+                });
+            }
+            return Unauthorized(new { message = "Bad password" });
         }
     }
 }

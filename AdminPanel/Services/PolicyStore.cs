@@ -1,53 +1,61 @@
+using System;
 using System.Collections.Concurrent;
 
 namespace AdminPanel.Services
 {
-    public sealed class AgentPolicy
-    {
-        public DateTimeOffset AllowedUntil { get; set; } = DateTimeOffset.Now.AddHours(1);
-        public bool RequireLock { get; set; } = false;
-
-        /// <summary>
-        /// Minutes granted when user unlocks with the server password.
-        /// </summary>
-        public int ManualUnlockGraceMinutes { get; set; } = 60;
-
-        /// <summary>
-        /// One-shot command for agent: "sleep" | "shutdown" (cleared after delivery).
-        /// </summary>
-        public string? PendingCommand { get; set; } = null;
-
-        public string Message { get; set; } = "";
-    }
-
     public interface IPolicyStore
     {
         AgentPolicy GetPolicy(string machine);
-        void SetPolicy(string machine, AgentPolicy policy);
+        void AddTime(string machine, int minutes);
+        void SetTime(string machine, int minutes);
+        void SetVolume(string machine, int volumePercent);
     }
 
-    public sealed class PolicyStore : IPolicyStore
+    public class AgentPolicy
     {
-        private readonly ConcurrentDictionary<string, AgentPolicy> _policies =
-            new(StringComparer.OrdinalIgnoreCase);
+        public DateTimeOffset AllowedUntil { get; set; } = DateTimeOffset.UtcNow;
+        public bool RequireLock { get; set; } = false;
 
-        public AgentPolicy GetPolicy(string machine)
+        public int ManualUnlockGraceMinutes { get; set; } = 60;
+
+        // пароль, який ми також віддаємо в policy
+        public string UnlockPassword { get; set; } = "7789Saurex";
+
+        // НОВЕ: поточна гучність (0..100)
+        public int VolumePercent { get; set; } = 50;
+    }
+
+    public class PolicyStore : IPolicyStore
+    {
+        private readonly ConcurrentDictionary<string, AgentPolicy> _policies = new();
+
+        private AgentPolicy Ensure(string machine) =>
+            _policies.GetOrAdd(machine, _ => new AgentPolicy());
+
+        public AgentPolicy GetPolicy(string machine) => Ensure(machine);
+
+        public void AddTime(string machine, int minutes)
         {
-            if (string.IsNullOrWhiteSpace(machine)) machine = "unknown";
-            return _policies.GetOrAdd(machine, _ => new AgentPolicy
-            {
-                AllowedUntil = DateTimeOffset.Now.AddHours(1),
-                RequireLock = false,
-                ManualUnlockGraceMinutes = 60,
-                PendingCommand = null,
-                Message = "Default policy"
-            });
+            var p = Ensure(machine);
+            if (minutes < 0) minutes = 0;
+            var now = DateTimeOffset.UtcNow;
+            if (p.AllowedUntil < now) p.AllowedUntil = now;
+            p.AllowedUntil = p.AllowedUntil.AddMinutes(minutes);
         }
 
-        public void SetPolicy(string machine, AgentPolicy policy)
+        public void SetTime(string machine, int minutes)
         {
-            if (string.IsNullOrWhiteSpace(machine)) return;
-            _policies[machine] = policy;
+            var p = Ensure(machine);
+            if (minutes < 0) minutes = 0;
+            p.AllowedUntil = DateTimeOffset.UtcNow.AddMinutes(minutes);
+        }
+
+        public void SetVolume(string machine, int volumePercent)
+        {
+            var p = Ensure(machine);
+            if (volumePercent < 0) volumePercent = 0;
+            if (volumePercent > 100) volumePercent = 100;
+            p.VolumePercent = volumePercent;
         }
     }
 }

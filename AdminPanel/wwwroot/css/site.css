@@ -11,8 +11,8 @@ body { margin-bottom: 60px; }
 
 /* Sizes */
 :root{
-  --uiFont: 1.25rem;
-  --uiFontLg: calc(var(--uiFont) * 1.20); /* +20% name & timer */
+  --uiFont: 1.15rem;
+  --uiFontLg: calc(var(--uiFont) * 1.18);
 }
 
 /* Card */
@@ -21,99 +21,116 @@ body { margin-bottom: 60px; }
   background: #c9d4ff;
   border-radius: 12px;
 }
-.admin-card .card-body{ padding:.45rem .55rem; }
+.admin-card .card-body{ padding:.40rem .55rem; }
 
-/* Row 1 */
-.pc-row1{
-  display:grid;
-  grid-template-columns: 1fr auto;
-  align-items:center;
-  gap:6px;
+/* OFFLINE look */
+.admin-card-offline{
+  border-color: #7a7a7a;
+  background: #e9e9e9;
+  filter: grayscale(0.25);
+  opacity: 0.92;
 }
-.pc-name{ font-size:var(--uiFontLg); font-weight:800; }
+.admin-card-offline input,
+.admin-card-offline button {
+  cursor: not-allowed !important;
+}
 
-/* Status */
+/* Row A: name | volume slider | status */
+.pc-rowA{
+  display:grid;
+  grid-template-columns: auto 1fr auto;
+  align-items:center;
+  gap:10px;
+}
+.pc-name{
+  font-size:var(--uiFontLg);
+  font-weight:800;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width: 28ch;
+}
 .badge-status{
   font-size:var(--uiFont);
-  padding:.3rem .7rem;
+  padding:.2rem .55rem;
   border-radius:.6rem;
-  font-weight:400;
+  font-weight:600;
+  white-space:nowrap;
 }
 
-/* Row 2: minutes + timer */
-.pc-row2.minutes-timer{
-  display:grid;
-  grid-template-columns: 1fr auto;
-  gap:6px;
-  align-items:stretch;
+/* Horizontal volume */
+.pc-vol-wrap{
+  display:flex; align-items:center;
+  min-width: 200px;
 }
+.vol-h{
+  width: 100%;
+  height: 28px;
+  margin: 0;
+}
+.vol-out{ min-width:2.5ch; display:inline-block; text-align:right; }
+
+/* Row B layout: [Minutes fixed] | [Add frac] | [Set frac] | [Timer auto] | [Off auto] */
+.pc-rowB{
+  display:grid;
+  grid-template-columns: max-content 1fr 1fr auto auto;
+  gap:10px;
+  align-items:center;
+  margin-top:.30rem;
+}
+
+/* Minutes group: fixed to fit 9999 exactly, no stretching */
+.minutes-group{ width: max-content; }
+.minutes-input{
+  width: 6.5ch;            /* влізе 9999 без запасу */
+  max-width: 6.5ch;
+  text-align: right;
+}
+
+/* Compact input group */
 .input-group.tight-input .input-group-text,
 .input-group.tight-input .form-control{
-  padding-top:.28rem; padding-bottom:.28rem;
+  padding-top:.25rem; padding-bottom:.25rem;
+  height:38px; min-height:38px; line-height:1.1;
+  font-size:var(--uiFont);
 }
 
-/* Timer: square like buttons + bold digits */
+/* Remaining badge */
 .badge-remaining{
-  font-size:var(--uiFontLg);
-  padding:.55rem 1.25rem;
-  font-weight:700;                 /* BOLD digits */
+  font-size:var(--uiFont);
+  padding:.30rem .75rem;
+  border-radius:10px;
+  font-weight:700;
   font-variant-numeric:tabular-nums;
-  min-width:13.5ch;
+  min-width:11.5ch;
   line-height:1;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
+  display:inline-flex; align-items:center; justify-content:center;
   text-align:center;
 }
-.square-timer{
-  border-radius:.5rem;             /* square-ish, like buttons */
-  border: 1px solid rgba(0,0,0,.08);
-}
 
-/* Row 3 buttons grid */
-.pc-row3{
-  display:grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap:6px;
-  margin-top:.5rem;
+/* Buttons */
+.touch-36{ min-height:36px; }
+.btn-gradient-blue{
+  color:#fff; border:0;
+  background: linear-gradient(135deg,#0a3ea8,#2f7cff);
 }
-.touch-44{ min-height:44px; }
+.btn-gradient-blue:hover{ filter:brightness(0.95); }
+.btn-dark{ color:#fff; }
+.btn-off{ white-space:nowrap; }
 
-/* Inputs */
-.admin-card .input-group .form-control,
-.admin-card .input-group .input-group-text{
-  height:48px; min-height:48px; line-height:1.2;
-  font-size:var(--uiFont);
-  font-weight:400;
-}
-.admin-card input[type="number"],
-.admin-card input[type="tel"]{
-  font-size:calc(var(--uiFont) * 1.5);
-  font-weight:400;
-  font-variant-numeric:tabular-nums;
-}
-
-/* === Unified gradient for Add and Set (dark blue -> blue) === */
-.btn-grad-main{
-  color:#fff;
-  background-image: linear-gradient(135deg, #0b3d91 0%, #1e6fff 100%);
-  border:0;
-}
-.btn-grad-main:hover{ filter:brightness(0.95); }
-
-/* === Off: solid black === */
-.btn-off-black{
-  background:#000;
-  color:#fff;
-  border:0;
-}
-.btn-off-black:hover{ filter:brightness(1.05); }
-
-/* Narrow devices tweaks */
-@media (max-width:380px){
-  .admin-card .card-body{ padding:.35rem .45rem; }
-  .badge-remaining{
-    min-width:11ch;
-    padding:.55rem 1rem;
+/* narrow */
+@media (max-width:640px){
+  .pc-rowB{
+    grid-template-columns: max-content 1fr 1fr auto auto;
+    gap:6px;
   }
+  .pc-name{ max-width: 20ch; }
+}
+@media (max-width:460px){
+  /* у дуже вузьких — таймер на новий ряд */
+  .pc-rowB{
+    grid-template-columns: max-content 1fr 1fr auto;
+    grid-auto-rows: auto;
+  }
+  .badge-remaining{ grid-column: 1 / -2; justify-self:start; margin-top:4px; }
 }
